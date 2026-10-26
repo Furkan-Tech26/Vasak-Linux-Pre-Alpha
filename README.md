@@ -1,6 +1,6 @@
 # Vaşak Linux 🐾
 
-**Vaşak Linux** is an independent, Arch-based Linux distribution with its own package repository, a graphical installer, and a custom boot experience. The name comes from the Turkish word for *lynx*.
+**Vaşak Linux** is a pacman-based Linux distribution with its own package repository, AUR support, a graphical installer, and a custom boot experience. The name comes from the Turkish word for *lynx*.
 
 > ⚠️ **Status: early development.** Things will break, change, and break again. Artwork is currently placeholder. Not recommended for production use yet.
 
@@ -8,8 +8,9 @@
 
 ## Features
 
-- **Arch-based**: built on `archiso` and `pacman`, so you get rolling-release packages
+- **pacman-based**: package management is done with `pacman`
 - **Custom `[vasak]` repository**: distro-specific packages live in their own repo
+- **AUR support**: use the Arch User Repository alongside `[vasak]` (see [AUR notes](#aur-notes))
 - **Graphical installer**: Calamares-based, with a custom bootloader selection step
 - **Bootloader choice**: pick systemd-boot, GRUB, or both during installation
 - **Optional boot animation**: a custom Plymouth theme you can enable at install time
@@ -35,12 +36,20 @@
 | `vasak-desktop-settings` | Default desktop configuration |
 | `vasak-artwork` | Logos, wallpapers, and boot themes |
 
+## AUR Notes
+
+AUR packages are available on the installed system. They are **not** bundled into the live ISO.
+
+- AUR packages are community-maintained and are not reviewed by the Vaşak team. Always check a `PKGBUILD` before installing it.
+- Installing from the AUR requires an AUR helper (such as `paru` or `yay`).
+- A full AUR guide is planned. See [`docs/`](docs/) for updates.
+
 ## Building the ISO
 
-The ISO must be built in an **Arch Linux environment** (native Arch, an Arch container, or WSL with Arch). Building on plain Windows is not supported.
+The ISO must be built on a **Linux system with `pacman` and `archiso` available** (a native install, a container, or WSL). Building on plain Windows is not supported.
 
 ```bash
-# Install build dependencies
+# Install the ISO build tool
 sudo pacman -S archiso
 
 # Clone the repository
@@ -84,7 +93,7 @@ See [`docs/INSTALL.md`](docs/INSTALL.md) for the full guide.
 
 ```
 .
-├── iso-profiles/     # archiso profiles (base, tty, xfce)
+├── iso-profiles/     # ISO profiles (base, tty, xfce)
 ├── packages/core/    # PKGBUILDs for [vasak] packages
 └── docs/             # Documentation
 ```
@@ -94,6 +103,7 @@ See [`docs/INSTALL.md`](docs/INSTALL.md) for the full guide.
 - [ ] Replace placeholder artwork with final logo and wallpapers
 - [ ] Package signing with a proper `vasak-keyring`
 - [ ] Hosted `[vasak]` repository
+- [ ] Detailed AUR guide
 - [ ] First public ISO release
 - [ ] Custom desktop environment
 
@@ -108,6 +118,6 @@ TBD
 
 ## Acknowledgments
 
-- [Arch Linux](https://archlinux.org/) and the `archiso` project
 - [Calamares](https://calamares.io/) installer framework
 - [Plymouth](https://www.freedesktop.org/wiki/Software/Plymouth/) boot splash
+- [Arch User Repository (AUR)](https://aur.archlinux.org/) community packages
