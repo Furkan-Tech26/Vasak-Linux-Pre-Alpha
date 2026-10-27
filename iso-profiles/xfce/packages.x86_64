@@ -1,0 +1,72 @@
+# Vaşak Linux XFCE profile - extra packages on top of base
+# Base list is merged in automatically by build-iso.sh
+
+# === Xorg / display stack ===
+xorg-server
+xorg-xinit
+mesa
+xf86-input-libinput
+
+# === XFCE Desktop ===
+xfce4
+xfce4-goodies
+xfce4-terminal
+thunar
+thunar-volman
+thunar-archive-plugin
+mousepad
+ristretto
+xfce4-screenshooter
+xfce4-taskmanager
+xfce4-power-manager
+xfce4-pulseaudio-plugin
+xfce4-whiskermenu-plugin
+xfce4-genmon-plugin
+xfce4-sensors-plugin
+
+# === Display Manager ===
+lightdm
+lightdm-gtk-greeter
+lightdm-gtk-greeter-settings
+vasak-desktop-settings
+
+# === Network Manager Applet ===
+network-manager-applet
+
+# === File associations / MIME ===
+xdg-user-dirs
+xdg-utils
+shared-mime-info
+
+# === Fonts ===
+noto-fonts
+noto-fonts-emoji
+ttf-liberation
+ttf-dejavu
+
+# === Themes / Icons (GTK) ===
+adwaita-icon-theme
+adw-gtk-theme
+papirus-icon-theme
+
+# === Audio ===
+pulseaudio
+pulseaudio-alsa
+pavucontrol
+alsa-utils
+
+# === Bluetooth ===
+bluez
+bluez-utils
+blueman
+
+# === Printing ===
+cups
+cups-pdf
+system-config-printer
+
+# === Utilities ===
+galculator
+catfish
+file-roller
+engrampa

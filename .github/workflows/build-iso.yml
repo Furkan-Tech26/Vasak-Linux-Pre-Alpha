@@ -1,0 +1,137 @@
+name: Build ISO
+
+on:
+  workflow_dispatch:
+    inputs:
+      profile:
+        description: "ISO profile to build"
+        required: true
+        default: "vasak"
+        type: choice
+        options:
+          - base
+          - tty
+          - xfce
+          - vasak
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-iso-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build ${{ github.event.inputs.profile || 'vasak' }} ISO
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    env:
+      PROFILE: ${{ github.event.inputs.profile || 'vasak' }}
+      VASAK_REPO_DIR: /work/vasak-repo
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Preflight checks
+        run: |
+          set -euo pipefail
+
+          echo "== Installer copies must stay identical =="
+          diff -u installer/vasak-install packages/core/vasak-installer/vasak-install
+
+          echo "== Mirrorlist copies must stay identical =="
+          diff -u packages/core/vasak-mirrorlist/mirrorlist \
+                  iso-profiles/base/airootfs/etc/pacman.d/mirrorlist
+
+          echo "== Shell syntax =="
+          while IFS= read -r -d '' f; do
+            bash -n "$f"
+          done < <(find . -type f \( -name '*.sh' -o -name 'PKGBUILD' -o -name 'vpm' \
+                    -o -name 'vasak-install' -o -name 'vasak-session' \
+                    -o -name '*.install' \) -not -path './.git/*' -print0)
+
+          echo "== Live boot configs =="
+          test -f iso-profiles/base/efiboot/loader/loader.conf
+          compgen -G "iso-profiles/base/efiboot/loader/entries/*.conf" >/dev/null
+          grep -q 'archisobasedir=%INSTALL_DIR%' iso-profiles/base/efiboot/loader/entries/*.conf
+          grep -q 'archisobasedir=%INSTALL_DIR%' iso-profiles/base/syslinux/syslinux.cfg
+
+          echo "== SVG well-formedness =="
+          python3 - <<'PY'
+          import pathlib
+          import xml.etree.ElementTree as ET
+          bad = []
+          for p in pathlib.Path("packages").rglob("*.svg"):
+              try:
+                  ET.parse(p)
+              except Exception as exc:
+                  bad.append(f"{p}: {exc}")
+          if bad:
+              raise SystemExit("\n".join(bad))
+          print("all SVGs parse")
+          PY
+
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL || true
+          sudo docker image prune -af || true
+          df -h
+
+      - name: Build ISO in Arch container
+        run: |
+          set -euo pipefail
+          docker run --privileged --rm \
+            -v "$GITHUB_WORKSPACE:/work" \
+            -w /work \
+            -e PROFILE="$PROFILE" \
+            -e VASAK_REPO_DIR="$VASAK_REPO_DIR" \
+            archlinux:latest bash -lc '
+              set -euo pipefail
+
+              echo "== Refreshing pacman keyring =="
+              pacman -Syu --noconfirm --needed archlinux-keyring gnupg
+              pacman-key --init
+              pacman-key --populate archlinux
+
+              echo "== Installing build tools =="
+              pacman -S --noconfirm --needed \
+                archiso base-devel git rsync sudo gawk namcap \
+                librsvg python-gobject gtk4
+
+              echo "== Preparing build user =="
+              id builder &>/dev/null || useradd -m builder
+              echo "builder ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/builder
+              WORK_UID="$(stat -c %u /work)"
+              WORK_GID="$(stat -c %g /work)"
+              chown -R builder:builder /work
+
+              echo "== Building [vasak] package repo =="
+              su -s /bin/bash builder -c \
+                "sudo env VASAK_REPO_DIR=\"$VASAK_REPO_DIR\" ./build-repo.sh"
+
+              echo "== Building ISO: $PROFILE =="
+              ./build-iso.sh "$PROFILE"
+
+              # Files created by root inside the container must be readable by
+              # the GitHub Actions runner user so the artifact upload works.
+              chown -R "$WORK_UID:$WORK_GID" /work
+            '
+
+      - name: Upload ISO artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vasak-iso-${{ github.event.inputs.profile || 'vasak' }}
+          path: iso-profiles/*/out/*.iso
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Build summary
+        run: |
+          echo "### Vaşak Linux ISO build" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          ls -lh iso-profiles/*/out/*.iso >> "$GITHUB_STEP_SUMMARY" || true

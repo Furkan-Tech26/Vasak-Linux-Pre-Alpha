@@ -1,0 +1,82 @@
+# Vaşak labwc configuration
+# Glassmorphism Wayland compositor config
+
+# --- Input ---
+input {
+    repeat_delay 250
+    repeat_rate 25
+    pointer_accel adaptive
+    pointer_accel_adaptive_threshold 4
+}
+
+# --- Appearance ---
+active_border_color #6366f1
+active_border_width 2
+inactive_border_color #333333
+inactive_border_width 1
+border_width 2
+background_color #1e1e24
+text_color #e5e7eb
+
+# --- Layout ---
+default_floating false
+new_window_center true
+xwayland_force_zero_scaling true
+
+# --- Workspaces ---
+workspace default default
+workspace 1 code
+workspace 2 web
+workspace 3 media
+workspace 4 sys
+
+workspace_layout default default
+workspace_layout 1 tile
+workspace_layout 2 tile
+workspace_layout 3 float
+workspace_layout 4 float
+
+# --- Rules ---
+rule {
+    app_id = floorp
+    workspace = 2
+}
+
+rule {
+    app_id = code-oss
+    workspace = 1
+}
+
+rule {
+    app_id = vasak-settings
+    floating true
+    size 800 520
+    center true
+}
+
+# --- Decorations ---
+decoration {
+    border_size 0
+    active_border_color #6366f1
+    inactive_border_color #333333
+    active_text_color #e5e7eb
+    inactive_text_color #9ca3af
+    title_format {title}
+    title_when_multiple false
+}
+
+# --- Focus ---
+focus_new_windows true
+focus_wraps false
+
+# --- Margins ---
+output * {
+    margin top 8
+    margin bottom 8
+    margin left 8
+    margin right 8
+    gap 8
+}
+
+# --- Panel (vasak-shell) layer ---
+# vasak-shell manages its own layer-shell surface

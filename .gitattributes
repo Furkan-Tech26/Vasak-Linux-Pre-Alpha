@@ -1,0 +1,14 @@
+# Vaşak Linux source tree.
+# Linux scripts and configs must always check out with LF endings.
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.ico binary
+*.efi binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.pkg.tar.zst binary
+*.iso binary

@@ -1,0 +1,16 @@
+post_install() {
+    # pacman-key needs gpg; the package depends on gnupg, but stay defensive
+    command -v gpg >/dev/null 2>&1 || return 0
+    pacman-key --init || true
+    pacman-key --populate vasak || true
+    pacman-key --lsign-key "Vaşak Linux Build Key <build@vasak-linux.org>" 2>/dev/null || true
+}
+
+post_upgrade() {
+    post_install
+}
+
+post_remove() {
+    command -v gpg >/dev/null 2>&1 || return 0
+    pacman-key --delete "Vaşak Linux Build Key <build@vasak-linux.org>" 2>/dev/null || true
+}

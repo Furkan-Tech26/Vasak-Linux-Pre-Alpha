@@ -1,0 +1,74 @@
+# Vaşak Linux GRUB Theme — Glassmorphism
+# Place at /boot/grub/themes/vasak/theme.txt
+
+# Global settings
+desktop-image: "background.png"
+desktop-color: "#1E1E2E"
+terminal-font: "DejaVu Sans Mono 12"
+terminal-border: 0
+terminal-box: "terminal_box_*.png"
+terminal-box: "terminal_box_*.png"
+
+# Boot menu
++ boot_menu {
+    left = 10%
+    top = 20%
+    width = 80%
+    height = 60%
+    item_font = "Noto Sans 16"
+    item_color = "#ECEFF4"
+    selected_item_color = "#88C0D0"
+    item_height = 40
+    item_padding = 10
+    item_spacing = 8
+    icon_width = 48
+    icon_height = 48
+    item_icon_space = 16
+
+    # Glassmorphism menu background
+    background = "menu_bg.png"
+    border = "menu_border.png"
+    border_width = 20
+
+    # Scrollbar
+    scrollbar = "scrollbar_*.png"
+    scrollbar_width = 8
+}
+
+# Progress bar (during kernel load)
++ progress_bar {
+    id = "__timeout__"
+    left = 15%
+    top = 85%
+    width = 70%
+    height = 8
+    bg_color = "#3B4252"
+    fg_color = "#88C0D0"
+    border_color = "#4C566A"
+    border_width = 1
+    text = "Booting Vaşak Linux... @SECONDS@s"
+    font = "Noto Sans 12"
+    text_color = "#D8DEE9"
+}
+
+# Label (bottom info)
++ label {
+    left = 50%
+    top = 95%
+    width = 90%
+    align = "center"
+    color = "#4C566A"
+    font = "Noto Sans 10"
+    text = "Vaşak Linux 2025.01  |  Badger doesn't care. Badger boots."
+}
+
+# Help text (F1)
++ label {
+    left = 10%
+    top = 90%
+    width = 80%
+    align = "left"
+    color = "#6272A4"
+    font = "Noto Sans 11"
+    text = "F1: Help  |  F2: Command Line  |  F3: Reboot  |  F4: Shutdown"
+}

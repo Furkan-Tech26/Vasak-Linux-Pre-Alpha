@@ -1,0 +1,1 @@
+"""Vaşak Shell panel subpackage."""

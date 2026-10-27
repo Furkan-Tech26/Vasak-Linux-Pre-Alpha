@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600">
+  <!-- Vaşak Linux Boot Splash - for systemd-boot/grub -->
+  <!-- Replace with actual artwork later -->
+  <defs>
+    <linearGradient id="bootBg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#1E1E2E;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#181825;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="badgeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#88C0D0;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#81A1C1;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="600" fill="url(#bootBg)"/>
+
+  <!-- Centered badge -->
+  <g transform="translate(400, 250)">
+    <!-- Circle background -->
+    <circle cx="0" cy="0" r="80" fill="#282A36" stroke="url(#badgeGradient)" stroke-width="3"/>
+
+    <!-- Badger silhouette (white) -->
+    <g fill="#ECEFF4">
+      <ellipse cx="0" cy="20" rx="28" ry="20"/>
+      <ellipse cx="36" cy="0" rx="16" ry="14"/>
+      <ellipse cx="50" cy="0" rx="10" ry="6"/>
+      <path d="M28,-20 Q30,-35 40,-20" fill="none" stroke="#ECEFF4" stroke-width="3" stroke-linecap="round"/>
+      <circle cx="38" cy="-2" r="2" fill="#1E1E2E"/>
+      <path d="M22,0 Q30,-8 42,0" fill="none" stroke="#88C0D0" stroke-width="4" stroke-linecap="round"/>
+      <path d="M22,10 Q30,18 42,10" fill="none" stroke="#88C0D0" stroke-width="4" stroke-linecap="round"/>
+      <rect x="-20" y="35" width="5" height="20" rx="2"/>
+      <rect x="-8" y="35" width="5" height="20" rx="2"/>
+      <rect x="20" y="35" width="5" height="20" rx="2"/>
+      <rect x="34" y="35" width="5" height="20" rx="2"/>
+      <path d="M-28,20 Q-40,15 -45,25" fill="none" stroke="#ECEFF4" stroke-width="6" stroke-linecap="round"/>
+    </g>
+  </g>
+
+  <!-- Distro name -->
+  <text x="400" y="380" font-family="sans-serif" font-size="32" font-weight="300" fill="#ECEFF4" text-anchor="middle" letter-spacing="3">VAŞAK LINUX</text>
+
+  <!-- Loading indicator -->
+  <g transform="translate(400, 450)">
+    <circle cx="0" cy="0" r="20" fill="none" stroke="#3B4252" stroke-width="4"/>
+    <circle cx="0" cy="0" r="20" fill="none" stroke="url(#badgeGradient)" stroke-width="4" stroke-dasharray="60 60" stroke-linecap="round">
+      <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="1.5s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+
+  <!-- Version -->
+  <text x="780" y="580" font-family="monospace" font-size="12" fill="#4C566A" text-anchor="end">vasak-2025.01</text>
+</svg>

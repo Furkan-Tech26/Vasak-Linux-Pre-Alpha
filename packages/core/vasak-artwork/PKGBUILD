@@ -1,0 +1,85 @@
+# Maintainer: Vaşak Linux <twinboi@vasak-linux.org>
+pkgname=vasak-artwork
+pkgver=20250101
+pkgrel=1
+pkgdesc="Vaşak Linux artwork (wallpapers, logos, boot splash, plymouth, systemd-boot, GRUB theme)"
+arch=('any')
+url="https://github.com/Furkan-Tech26/Vasak-Linux-Pre-Alpha"
+license=('CC-BY-SA-4.0')
+makedepends=('librsvg')
+source=()
+sha256sums=()
+
+build() {
+	# Convert SVGs to PNGs/JPGs at appropriate sizes
+	rm -rf "$srcdir/raster"
+	mkdir -p "$srcdir/raster"
+
+	# Wallpaper (1920x1080, PNG only — rsvg-convert cannot write JPEG)
+	rsvg-convert -w 1920 -h 1080 "$startdir/backgrounds/default.svg" -o "$srcdir/raster/default.png"
+
+	# Logo (256x256)
+	rsvg-convert -w 256 -h 256 "$startdir/logos/vasak-logo.svg" -o "$srcdir/raster/vasak-logo.png"
+
+	# Boot splash (1920x1080)
+	rsvg-convert -w 1920 -h 1080 "$startdir/boot/vasak-boot.svg" -o "$srcdir/raster/vasak-boot.png"
+
+	# Plymouth assets
+	rsvg-convert -w 512 -h 512 "$startdir/plymouth/vasak-logo.svg" -o "$srcdir/raster/vasak-logo-plymouth.png"
+	rsvg-convert -w 64 -h 64 "$startdir/plymouth/glow.svg" -o "$srcdir/raster/glow.png"
+	rsvg-convert -w 64 -h 64 "$startdir/plymouth/spinner.svg" -o "$srcdir/raster/spinner.png"
+
+	# GRUB theme assets (SVG→PNG)
+	rsvg-convert -w 1920 -h 1080 "$startdir/grub-theme/background.svg" -o "$srcdir/raster/grub-background.png"
+	rsvg-convert -w 1280 -h 720 "$startdir/grub-theme/menu_bg.svg" -o "$srcdir/raster/menu_bg.png"
+	rsvg-convert -w 1280 -h 720 "$startdir/grub-theme/menu_border.svg" -o "$srcdir/raster/menu_border.png"
+	rsvg-convert -w 8 -h 32 "$startdir/grub-theme/scrollbar_c.svg" -o "$srcdir/raster/scrollbar_c.png"
+	rsvg-convert -w 8 -h 32 "$startdir/grub-theme/scrollbar_n.svg" -o "$srcdir/raster/scrollbar_n.png"
+	rsvg-convert -w 8 -h 32 "$startdir/grub-theme/scrollbar_s.svg" -o "$srcdir/raster/scrollbar_s.png"
+
+	# Terminal box parts (48x48 each)
+	for part in c nw ne sw se n s e w; do
+		rsvg-convert -w 48 -h 48 "$startdir/grub-theme/terminal_box_${part}.svg" -o "$srcdir/raster/terminal_box_${part}.png"
+	done
+}
+
+package() {
+	# Wallpaper (PNG)
+	install -dm755 "$pkgdir/usr/share/backgrounds/vasak/"
+	install -m644 "$srcdir/raster/default.png" "$pkgdir/usr/share/backgrounds/vasak/default.png"
+
+	# Logos
+	install -dm755 "$pkgdir/usr/share/pixmaps/"
+	install -m644 "$startdir/logos/vasak-logo.svg" "$pkgdir/usr/share/pixmaps/vasak-logo.svg"
+	install -m644 "$srcdir/raster/vasak-logo.png" "$pkgdir/usr/share/pixmaps/vasak-logo.png"
+
+	# Boot splash (for systemd-boot / grub)
+	install -dm755 "$pkgdir/usr/share/vasak/boot/"
+	install -m644 "$srcdir/raster/vasak-boot.png" "$pkgdir/usr/share/vasak/boot/vasak-boot.png"
+
+	# Plymouth theme
+	install -dm755 "$pkgdir/usr/share/plymouth/themes/vasak/"
+	install -m644 "$startdir/plymouth/vasak.plymouth" "$pkgdir/usr/share/plymouth/themes/vasak/vasak.plymouth"
+	install -m644 "$startdir/plymouth/vasak.script" "$pkgdir/usr/share/plymouth/themes/vasak/vasak.script"
+	install -m644 "$srcdir/raster/vasak-logo-plymouth.png" "$pkgdir/usr/share/plymouth/themes/vasak/vasak-logo.png"
+	install -m644 "$srcdir/raster/glow.png" "$pkgdir/usr/share/plymouth/themes/vasak/glow.png"
+	install -m644 "$srcdir/raster/spinner.png" "$pkgdir/usr/share/plymouth/themes/vasak/spinner.png"
+
+	# systemd-boot theme
+	install -dm755 "$pkgdir/usr/share/vasak/systemd-boot/"
+	install -m644 "$startdir/systemd-boot/splash.png" "$pkgdir/usr/share/vasak/systemd-boot/splash.png"
+	install -m644 "$startdir/systemd-boot/loader.conf" "$pkgdir/usr/share/vasak/systemd-boot/loader.conf"
+
+	# GRUB theme (converted PNGs from build())
+	install -dm755 "$pkgdir/usr/share/vasak/grub-theme/"
+	install -m644 "$startdir/grub-theme/theme.txt" "$pkgdir/usr/share/vasak/grub-theme/theme.txt"
+	install -m644 "$srcdir/raster/grub-background.png" "$pkgdir/usr/share/vasak/grub-theme/background.png"
+	install -m644 "$srcdir/raster/menu_bg.png" "$pkgdir/usr/share/vasak/grub-theme/menu_bg.png"
+	install -m644 "$srcdir/raster/menu_border.png" "$pkgdir/usr/share/vasak/grub-theme/menu_border.png"
+	install -m644 "$srcdir/raster/scrollbar_c.png" "$pkgdir/usr/share/vasak/grub-theme/scrollbar_c.png"
+	install -m644 "$srcdir/raster/scrollbar_n.png" "$pkgdir/usr/share/vasak/grub-theme/scrollbar_n.png"
+	install -m644 "$srcdir/raster/scrollbar_s.png" "$pkgdir/usr/share/vasak/grub-theme/scrollbar_s.png"
+	for part in c nw ne sw se n s e w; do
+		install -m644 "$srcdir/raster/terminal_box_${part}.png" "$pkgdir/usr/share/vasak/grub-theme/terminal_box_${part}.png"
+	done
+}

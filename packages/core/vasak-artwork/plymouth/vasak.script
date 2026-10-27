@@ -1,0 +1,169 @@
+# Vaşak Linux Plymouth Theme Script
+# Glassmorphism boot animation with badger logo
+
+# Window setup
+Window.SetBackgroundTopColor(0.12, 0.12, 0.18);  # #1E1E2E
+Window.SetBackgroundBottomColor(0.09, 0.09, 0.15); # #181825
+
+# Load images
+logo = Image("vasak-logo.png");
+bg_glow = Image("glow.png");
+spinner = Image("spinner.png");
+
+# Animation variables
+angle = 0;
+logo_y = -100;
+target_y = Window.GetHeight() * 0.35;
+animating = true;
+progress = 0;
+
+# Colors (Nord palette)
+teal = {0.53, 0.75, 0.82};      # #88C0D0
+teal_dim = {0.53, 0.75, 0.82, 0.3};
+dark = {0.12, 0.12, 0.18};
+dark_card = {0.16, 0.16, 0.21, 0.85};
+
+fun draw_background() {
+    # Gradient background
+    Window.DrawRect(0, 0, Window.GetWidth(), Window.GetHeight(), 0.12, 0.12, 0.18);
+
+    # Subtle glow circles
+    w = Window.GetWidth();
+    h = Window.GetHeight();
+
+    # Top-left glow
+    for (i = 0; i < 50; i++) {
+        alpha = 0.02 * (1 - i/50);
+        Window.DrawCircle(w * 0.15, h * 0.2, i * 8, 0.53, 0.75, 0.82, alpha);
+    }
+
+    # Bottom-right glow
+    for (i = 0; i < 50; i++) {
+        alpha = 0.015 * (1 - i/50);
+        Window.DrawCircle(w * 0.85, h * 0.8, i * 8, 0.51, 0.63, 0.75, alpha);
+    }
+
+    # Center glow
+    for (i = 0; i < 40; i++) {
+        alpha = 0.01 * (1 - i/40);
+        Window.DrawCircle(w * 0.5, h * 0.4, i * 10, 0.53, 0.75, 0.82, alpha);
+    }
+}
+
+fun draw_glass_card(x, y, w, h) {
+    # Glassmorphism card background
+    Window.DrawRect(x, y, w, h, 0.16, 0.16, 0.21, 0.85);
+
+    # Top highlight
+    Window.DrawRect(x, y, w, 1, 0.53, 0.75, 0.82, 0.3);
+
+    # Subtle border
+    Window.DrawRect(x, y, w, h, 0.53, 0.75, 0.82, 0.2, false);
+}
+
+fun update_progress() {
+    progress = Plymouth.GetBootProgress();
+    if (progress == 0) {
+        progress = angle / 360.0;
+    }
+}
+
+fun draw_spinner(cx, cy, radius) {
+    angle = angle + 3;
+    if (angle >= 360) angle = angle - 360;
+
+    # Draw spinner arc
+    segments = 12;
+    for (i = 0; i < segments; i++) {
+        a = angle + i * (360 / segments);
+        rad = a * 3.14159 / 180;
+        alpha = 1.0 - (i / segments);
+        x = cx + cos(rad) * radius;
+        y = cy + sin(rad) * radius;
+        x2 = cx + cos(rad) * (radius - 8);
+        y2 = cy + sin(rad) * (radius - 8);
+        Window.DrawLine(x, y, x2, y2, 0.53, 0.75, 0.82, alpha * 0.8);
+    }
+}
+
+fun draw_text() {
+    w = Window.GetWidth();
+    h = Window.GetHeight();
+
+    # Distro name
+    Window.DrawString("VAŞAK LINUX", w/2, h * 0.65, 1.0, 1.0, 1.0, 0.5, "center", 24);
+
+    # Tagline
+    Window.DrawString("Badger doesn't care. Badger boots.", w/2, h * 0.70, 0.53, 0.75, 0.82, 0.5, "center", 12);
+
+    # Version
+    Window.DrawString("2025.01", w - 20, h - 20, 0.3, 0.3, 0.35, 1.0, "right", 10);
+}
+
+fun draw_status() {
+    w = Window.GetWidth();
+    h = Window.GetHeight();
+    msg = Plymouth.GetMessage();
+
+    if (msg != "") {
+        # Glass card for status
+        card_w = w * 0.6;
+        card_h = 60;
+        card_x = (w - card_w) / 2;
+        card_y = h * 0.82;
+        draw_glass_card(card_x, card_y, card_w, card_h);
+
+        # Status text
+        Window.DrawString(msg, w/2, card_y + card_h/2 + 5, 0.85, 0.85, 0.85, 0.5, "center", 11);
+    }
+}
+
+# Main draw loop
+fun refresh_callback() {
+    draw_background();
+
+    # Animate logo entrance
+    if (animating) {
+        logo_y = logo_y + (target_y - logo_y) * 0.1;
+        if (abs(logo_y - target_y) < 2) {
+            animating = false;
+        }
+    }
+
+    # Draw logo
+    if (logo.IsValid()) {
+        lw = logo.GetWidth();
+        lh = logo.GetHeight();
+        scale = 0.4;
+        Window.DrawImage(logo, (Window.GetWidth() - lw * scale) / 2, logo_y, scale);
+    }
+
+    # Draw spinner
+    cx = Window.GetWidth() / 2;
+    cy = target_y + logo.GetHeight() * 0.4 + 60;
+    draw_spinner(cx, cy, 30);
+
+    # Progress bar (glass card)
+    pb_w = Window.GetWidth() * 0.5;
+    pb_h = 6;
+    pb_x = (Window.GetWidth() - pb_w) / 2;
+    pb_y = cy + 50;
+    draw_glass_card(pb_x - 10, pb_y - 10, pb_w + 20, pb_h + 20);
+
+    # Progress fill
+    if (progress > 0) {
+        fill_w = pb_w * progress;
+        Window.DrawRect(pb_x, pb_y, fill_w, pb_h, 0.53, 0.75, 0.82, 1.0);
+    } else {
+        # Indeterminate animation
+        bar_w = pb_w * 0.3;
+        bar_x = pb_x + (angle / 360.0) * (pb_w - bar_w);
+        Window.DrawRect(bar_x, pb_y, bar_w, pb_h, 0.53, 0.75, 0.82, 0.8);
+    }
+
+    draw_text();
+    draw_status();
+}
+
+# Boot progress callback
+Plymouth.SetRefreshFunction(refresh_callback);

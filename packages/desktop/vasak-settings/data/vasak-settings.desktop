@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Vaşak Settings
+GenericName=Settings
+Comment=Vaşak Desktop Environment settings
+Exec=vasak-settings
+Icon=vasak-settings
+Terminal=false
+Type=Application
+Categories=Settings;DesktopSettings;
+X-GNOME-Autostart-Phase=Initialization

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+  <rect width="1920" height="1080" fill="#0f0f14" />
+  <circle cx="960" cy="540" r="500" fill="none" stroke="#2d2d3a" stroke-width="2" />
+  <circle cx="960" cy="540" r="700" fill="none" stroke="#1a1a24" stroke-width="1" />
+  <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#888" font-family="sans-serif" font-size="40" font-weight="500">Vaşak Dark</text>
+</svg>

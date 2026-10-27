@@ -1,0 +1,97 @@
+# Vaşak Linux base packages - minimal bootable system
+# Official Arch repos + the local [vasak] repo built by build-repo.sh
+# NOTE: only repo packages here. AUR packages cannot be used by mkarchiso.
+
+# === Base system ===
+base
+linux
+linux-firmware
+systemd
+systemd-sysvcompat
+mkinitcpio
+mkinitcpio-archiso
+
+# === Package management + installer tooling ===
+pacman
+pacman-contrib
+arch-install-scripts
+sudo
+
+# === Networking ===
+networkmanager
+dhcpcd
+iwd
+openssh
+
+# === Filesystem / storage ===
+e2fsprogs
+dosfstools
+btrfs-progs
+lvm2
+cryptsetup
+
+# === Essential tools ===
+bash
+coreutils
+util-linux
+grep
+sed
+gawk
+findutils
+diffutils
+less
+vim
+nano
+man-db
+man-pages
+texinfo
+which
+psmisc
+procps-ng
+iproute2
+inetutils
+net-tools
+tmux
+
+# === Build tools (for on-device package building) ===
+base-devel
+git
+meson
+ninja
+cmake
+pkgconf
+
+# === System utilities ===
+htop
+btop
+fastfetch
+parted
+gptfdisk
+efibootmgr
+reflector
+
+# === Bootloaders ===
+grub
+syslinux
+
+# === Compression / archives ===
+zstd
+xz
+gzip
+bzip2
+tar
+unzip
+7zip
+
+# === Security ===
+archlinux-keyring
+gnupg
+ca-certificates
+openssl
+
+# === Vaşak custom packages (from [vasak] repo) ===
+vasak-keyring
+vasak-installer
+vasak-mirrorlist
+vasak-artwork
+vasak-vpm

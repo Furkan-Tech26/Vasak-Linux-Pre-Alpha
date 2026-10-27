@@ -1,0 +1,16 @@
+# Maintainer: Vaşak Linux <twinboi@vasak-linux.org>
+pkgname=vasak-vpm
+pkgver=0.1.0
+pkgrel=1
+pkgdesc="Vaşak Package Manager — pacman wrapper with Vaşak branding (vpm command)"
+arch=('any')
+url="https://github.com/Furkan-Tech26/Vasak-Linux-Pre-Alpha"
+license=('GPL')
+depends=('pacman')
+source=('vpm')
+sha256sums=('SKIP')
+
+package() {
+	install -dm755 "$pkgdir/usr/bin/"
+	install -m755 "$srcdir/vpm" "$pkgdir/usr/bin/vpm"
+}

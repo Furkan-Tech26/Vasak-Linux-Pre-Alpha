@@ -1,0 +1,16 @@
+# Maintainer: Vaşak Linux <twinboi@vasak-linux.org>
+pkgname=vasak-installer
+pkgver=0.1.0
+pkgrel=1
+pkgdesc="Vaşak Linux text-mode installer (vasak-install command)"
+arch=('any')
+url="https://github.com/Furkan-Tech26/Vasak-Linux-Pre-Alpha"
+license=('GPL')
+depends=('bash' 'pacman' 'arch-install-scripts' 'util-linux' 'gptfdisk' 'cryptsetup' 'efibootmgr' 'systemd')
+source=('vasak-install')
+sha256sums=('SKIP')
+
+package() {
+    install -dm755 "$pkgdir/usr/bin/"
+    install -m755 "$srcdir/vasak-install" "$pkgdir/usr/bin/vasak-install"
+}

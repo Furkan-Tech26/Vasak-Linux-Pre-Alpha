@@ -1,0 +1,507 @@
+#!/usr/bin/env bash
+#
+# vasak-install - Vaşak Linux text-mode installer
+# Run from live ISO: vasak-install
+# Inspired by archinstall, but simpler and Vaşak-branded
+#
+
+set -euo pipefail
+
+# ============================================================
+# CONFIGURATION & CONSTANTS
+# ============================================================
+VERSION="0.2.0"
+DISTRO_NAME="Vaşak Linux"
+TARGET_MOUNT="/mnt"
+LOG_FILE="/var/log/vasak-install.log"
+LIVE_REPO="/opt/vasak/repo"
+
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+CYAN='\033[0;36m'
+BOLD='\033[1m'
+RESET='\033[0m'
+
+# ============================================================
+# HELPER FUNCTIONS
+# ============================================================
+log() {
+    echo -e "$1" | tee -a "$LOG_FILE"
+}
+
+info() { log "${BLUE}[INFO]${RESET} $1"; }
+ok()   { log "${GREEN}[OK]${RESET}   $1"; }
+warn() { log "${YELLOW}[WARN]${RESET} $1"; }
+err()  { log "${RED}[ERR]${RESET}  $1"; }
+title() { log "\n${BOLD}${CYAN}=== $1 ===${RESET}\n"; }
+
+prompt() {
+    local msg="$1" default="${2:-}"
+    local input
+    if [[ -n "$default" ]]; then
+        read -rp "$(echo -e "${CYAN}$msg${RESET} [$default]: ")" input
+        echo "${input:-$default}"
+    else
+        read -rp "$(echo -e "${CYAN}$msg${RESET}: ")" input
+        echo "$input"
+    fi
+}
+
+confirm() {
+    local msg="$1" default="${2:-n}"
+    local prompt_yn="[y/N]"
+    [[ "$default" == "y" ]] && prompt_yn="[Y/n]"
+    read -rp "$(echo -e "${CYAN}$msg $prompt_yn${RESET}: ")" input
+    input="${input:-$default}"
+    [[ "$input" =~ ^[Yy]$ ]]
+}
+
+die() {
+    err "$1"
+    exit 1
+}
+
+run() {
+    info "Running: $*"
+    "$@" 2>&1 | tee -a "$LOG_FILE"
+    return ${PIPESTATUS[0]}
+}
+
+# ============================================================
+# PRE-FLIGHT CHECKS
+# ============================================================
+check_root() {
+    [[ $EUID -eq 0 ]] || die "Must run as root. Use: sudo vasak-install"
+}
+
+check_archiso() {
+    [[ -d "/run/archiso" ]] || die "Not running in Vaşak Linux live ISO. Boot the ISO first."
+}
+
+check_internet() {
+    info "Checking network connectivity..."
+    if ! curl -fsS --max-time 10 -o /dev/null https://geo.mirror.pkgbuild.com/core/os/x86_64/core.db; then
+        err "No internet access."
+        err "The Arch packages are downloaded during installation, so a network"
+        err "connection is required. Configure Wi-Fi/Ethernet with 'nmtui',"
+        err "then run 'vasak-install' again."
+        exit 1
+    fi
+    ok "Network is up"
+}
+
+# ============================================================
+# DISK SELECTION & PARTITIONING
+# ============================================================
+select_disk() {
+    title "DISK SELECTION"
+    info "Available disks:"
+    lsblk -d -o NAME,SIZE,TYPE,MODEL | grep -E "^(sd|vd|nvme|mmcblk)" | tee -a "$LOG_FILE"
+    echo
+
+    local disk
+    while true; do
+        disk=$(prompt "Select target disk (e.g., sda, nvme0n1)" "")
+        [[ -b "/dev/$disk" ]] && break
+        err "Block device /dev/$disk not found"
+    done
+    TARGET_DISK="/dev/$disk"
+    ok "Selected: $TARGET_DISK"
+}
+
+partition_disk() {
+    title "PARTITIONING $TARGET_DISK"
+    warn "THIS WILL DESTROY ALL DATA ON $TARGET_DISK"
+    confirm "Continue?" || die "Aborted"
+
+    if [[ -d /sys/firmware/efi ]]; then
+        UEFI=1
+    else
+        UEFI=0
+    fi
+
+    # Wipe
+    run wipefs -a "$TARGET_DISK"
+    run sgdisk -Z "$TARGET_DISK"
+
+    local root_type="8300"   # Linux filesystem
+    if confirm "Use LUKS encryption for root?"; then
+        USE_LUKS=1
+        root_type="8304"     # Linux root (x86-64)
+    else
+        USE_LUKS=0
+    fi
+
+    if [[ $UEFI -eq 1 ]]; then
+        info "UEFI detected: creating ESP (512M) + root"
+        run sgdisk -n 1:0:+512M -t 1:ef00 -c 1:"EFI System" "$TARGET_DISK"
+    else
+        info "Legacy BIOS detected: creating 1M BIOS boot + root"
+        run sgdisk -n 1:0:+1M -t 1:ef02 -c 1:"BIOS boot" "$TARGET_DISK"
+    fi
+    run sgdisk -n 2:0:0 -t "2:$root_type" -c 2:"Vaşak Linux root" "$TARGET_DISK"
+
+    run partprobe "$TARGET_DISK"
+    sleep 1
+
+    if [[ "$TARGET_DISK" =~ nvme|mmcblk ]]; then
+        ESP_PART="${TARGET_DISK}p1"
+        ROOT_PART="${TARGET_DISK}p2"
+    else
+        ESP_PART="${TARGET_DISK}1"
+        ROOT_PART="${TARGET_DISK}2"
+    fi
+
+    # On BIOS the first partition is the BIOS boot partition, not an ESP.
+    if [[ $UEFI -eq 0 ]]; then
+        ESP_PART=""
+    fi
+
+    ok "Partitions: ESP=${ESP_PART:-none} ROOT=$ROOT_PART"
+}
+
+format_partitions() {
+    title "FORMATTING PARTITIONS"
+
+    if [[ $UEFI -eq 1 ]]; then
+        run mkfs.fat -F32 -n "VASAK_EFI" "$ESP_PART"
+        ok "ESP formatted as FAT32"
+    fi
+
+    if [[ $USE_LUKS -eq 1 ]]; then
+        local luks_pass
+        while true; do
+            luks_pass=$(prompt "LUKS passphrase" "")
+            [[ ${#luks_pass} -ge 8 ]] && break
+            err "Passphrase must be at least 8 characters"
+        done
+        echo -n "$luks_pass" | run cryptsetup luksFormat --batch-mode --type luks2 "$ROOT_PART" -
+        echo -n "$luks_pass" | run cryptsetup open "$ROOT_PART" cryptroot -
+        ROOT_MAP="/dev/mapper/cryptroot"
+        run mkfs.ext4 -L "VASAK_ROOT" "$ROOT_MAP"
+        ok "LUKS root formatted as ext4"
+    else
+        ROOT_MAP="$ROOT_PART"
+        run mkfs.ext4 -L "VASAK_ROOT" "$ROOT_MAP"
+        ok "Root formatted as ext4"
+    fi
+}
+
+mount_partitions() {
+    title "MOUNTING PARTITIONS"
+    run mount "$ROOT_MAP" "$TARGET_MOUNT"
+    if [[ $UEFI -eq 1 ]]; then
+        run mkdir -p "$TARGET_MOUNT/boot"
+        run mount "$ESP_PART" "$TARGET_MOUNT/boot"
+    fi
+    ok "Mounted at $TARGET_MOUNT"
+}
+
+# ============================================================
+# BASE INSTALLATION
+# ============================================================
+install_base() {
+    title "INSTALLING BASE SYSTEM"
+
+    # pacstrap always runs `pacman -Sy` using a temporary copy of the live
+    # /etc/pacman.conf. That config points [vasak] at file:///opt/vasak/repo,
+    # so our packages install offline while the Arch repos come from the net.
+    local packages=(
+        base linux linux-firmware
+        systemd systemd-sysvcompat
+        mkinitcpio
+        archlinux-keyring
+        networkmanager dhcpcd iwd openssh
+        grub efibootmgr
+        sudo vim nano man-db man-pages
+        reflector
+        vasak-keyring vasak-mirrorlist vasak-installer
+        vasak-artwork
+    )
+
+    # Optional desktop. The Vaşak DE itself comes from the bundled [vasak]
+    # repo; its Wayland/GTK runtime dependencies come from the Arch repos.
+    # Xorg is only needed for the LightDM greeter.
+    if confirm "Install the Vaşak DE desktop (labwc + shell, ~1 GB)?" y; then
+        packages+=(
+            vasak-de-meta
+            lightdm lightdm-gtk-greeter xorg-server
+            foot polkit-gnome
+            xdg-desktop-portal xdg-desktop-portal-wlr
+        )
+    fi
+
+    # -K: initialise a fresh keyring in the target (Arch's recommended method;
+    #     the live keyring is used for verification and archlinux-keyring's
+    #     hook populates the target).
+    # -c: cache downloads in the live medium's RAM instead of the target disk.
+    run pacstrap -K -c "$TARGET_MOUNT" "${packages[@]}"
+    ok "Base system installed"
+
+    # Carry the bundled [vasak] repo over so the installed system can
+    # install/update our packages offline (mirrorlist-vasak points here).
+    if [[ -d "$LIVE_REPO" ]]; then
+        run mkdir -p "$TARGET_MOUNT/opt/vasak"
+        run cp -a "$LIVE_REPO" "$TARGET_MOUNT/opt/vasak/repo"
+        ok "Offline [vasak] repo copied to /opt/vasak/repo"
+    else
+        warn "Bundled [vasak] repo not found at $LIVE_REPO"
+    fi
+}
+
+generate_fstab() {
+    title "GENERATING FSTAB"
+    info "Writing /etc/fstab..."
+    # Not routed through run(): its INFO line would end up inside fstab.
+    genfstab -U "$TARGET_MOUNT" >> "$TARGET_MOUNT/etc/fstab"
+    cat "$TARGET_MOUNT/etc/fstab" | tee -a "$LOG_FILE"
+    ok "fstab generated"
+}
+
+# ============================================================
+# SYSTEM CONFIGURATION (chroot)
+# ============================================================
+configure_system() {
+    title "CONFIGURING SYSTEM"
+
+    local hostname username root_pass user_pass
+    hostname=$(prompt "Hostname" "vasak")
+    username=$(prompt "Username" "twinboi")
+
+    while true; do
+        root_pass=$(prompt "Root password" "")
+        [[ ${#root_pass} -ge 8 ]] && break
+        err "Password must be at least 8 characters"
+    done
+
+    while true; do
+        user_pass=$(prompt "User password ($username)" "")
+        [[ ${#user_pass} -ge 8 ]] && break
+        err "Password must be at least 8 characters"
+    done
+
+    local tz locale keymap
+    tz=$(prompt "Timezone" "Europe/Istanbul")
+    locale=$(prompt "Locale" "en_US.UTF-8")
+    keymap=$(prompt "Keymap" "trq")
+
+    local bootloader_choice
+    echo ""
+    if [[ $UEFI -eq 1 ]]; then
+        info "Bootloader options:"
+        echo "  1) systemd-boot (simple, fast)"
+        echo "  2) GRUB (UEFI)"
+        echo "  3) Both (systemd-boot primary, GRUB as fallback)"
+        bootloader_choice=$(prompt "Choose bootloader [1/2/3]" "1")
+    else
+        info "Legacy BIOS detected: GRUB will be installed."
+        bootloader_choice=2
+    fi
+
+    # The chroot script is a quoted heredoc: nothing is expanded here.
+    # All values are passed through the environment so passwords and special
+    # characters can never be interpreted as shell code.
+    cat > "$TARGET_MOUNT/configure.sh" <<'CHROOT_EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+
+: "${VASAK_HOSTNAME:?}" "${VASAK_USER:?}" "${VASAK_ROOT_PASS:?}" "${VASAK_USER_PASS:?}"
+: "${VASAK_TZ:?}" "${VASAK_LOCALE:?}" "${VASAK_KEYMAP:?}" "${VASAK_BOOTLOADER:?}"
+: "${VASAK_ROOT_PART:?}" "${VASAK_TARGET_DISK:?}" "${VASAK_USE_LUKS:?}" "${VASAK_UEFI:?}"
+
+# Hostname
+echo "$VASAK_HOSTNAME" > /etc/hostname
+
+# Locale
+if ! grep -qE "^#?${VASAK_LOCALE} UTF-8" /etc/locale.gen; then
+    echo "${VASAK_LOCALE} UTF-8" >> /etc/locale.gen
+fi
+sed -i -E "s/^#(${VASAK_LOCALE} UTF-8)/\1/" /etc/locale.gen
+locale-gen
+echo "LANG=$VASAK_LOCALE" > /etc/locale.conf
+echo "KEYMAP=$VASAK_KEYMAP" > /etc/vconsole.conf
+
+# Timezone
+if [[ ! -e "/usr/share/zoneinfo/$VASAK_TZ" ]]; then
+    echo "Invalid timezone: $VASAK_TZ" >&2
+    exit 1
+fi
+ln -sf "/usr/share/zoneinfo/$VASAK_TZ" /etc/localtime
+hwclock --systohc || true
+
+# Network
+systemctl enable NetworkManager.service
+
+# Graphical login (only present when the optional Vaşak DE was installed)
+if [[ -x /usr/bin/lightdm ]]; then
+    systemctl enable lightdm.service
+fi
+
+# Pacman keyring (pacstrap -K initialises it; populate the Arch keys)
+pacman-key --init
+pacman-key --populate archlinux
+
+# Keep the bundled offline [vasak] repo configured. mirrorlist-vasak points
+# at /opt/vasak/repo, which install_base copies from the live medium.
+if ! grep -q '^\[vasak\]' /etc/pacman.conf; then
+    printf '\n[vasak]\nSigLevel = Optional TrustAll\nInclude = /etc/pacman.d/mirrorlist-vasak\n' >> /etc/pacman.conf
+fi
+
+# Users
+echo "root:$VASAK_ROOT_PASS" | chpasswd
+useradd -m -G wheel -s /bin/bash "$VASAK_USER"
+echo "$VASAK_USER:$VASAK_USER_PASS" | chpasswd
+echo "%wheel ALL=(ALL:ALL) ALL" > /etc/sudoers.d/wheel
+chmod 440 /etc/sudoers.d/wheel
+
+# Initramfs: the encrypt hook is required to boot a LUKS root
+if [[ "$VASAK_USE_LUKS" -eq 1 ]]; then
+    if ! grep -q '^HOOKS=.*encrypt' /etc/mkinitcpio.conf; then
+        sed -i '/^HOOKS=/ s/ filesystems/ encrypt filesystems/' /etc/mkinitcpio.conf
+    fi
+fi
+mkinitcpio -P
+
+# Kernel command line
+PARTUUID="$(blkid -s PARTUUID -o value "$VASAK_ROOT_PART")"
+KERNEL_CMDLINE="root=PARTUUID=$PARTUUID rw"
+GRUB_CMDLINE=""
+if [[ "$VASAK_USE_LUKS" -eq 1 ]]; then
+    KERNEL_CMDLINE="cryptdevice=PARTUUID=$PARTUUID:cryptroot root=/dev/mapper/cryptroot rw"
+    GRUB_CMDLINE="cryptdevice=PARTUUID=$PARTUUID:cryptroot"
+fi
+
+# systemd-boot (UEFI)
+if [[ "$VASAK_BOOTLOADER" -eq 1 || "$VASAK_BOOTLOADER" -eq 3 ]]; then
+    echo "Installing systemd-boot..."
+    bootctl install
+    mkdir -p /boot/loader/entries
+    cat > /boot/loader/loader.conf <<BOOT_EOF
+default vasak
+timeout 3
+console-mode max
+editor no
+BOOT_EOF
+
+    cat > /boot/loader/entries/vasak.conf <<ENTRY_EOF
+title   Vaşak Linux (systemd-boot)
+linux   /vmlinuz-linux
+initrd  /initramfs-linux.img
+options $KERNEL_CMDLINE
+ENTRY_EOF
+    echo "systemd-boot installed"
+fi
+
+# GRUB (UEFI + BIOS)
+if [[ "$VASAK_BOOTLOADER" -eq 2 || "$VASAK_BOOTLOADER" -eq 3 ]]; then
+    echo "Installing GRUB..."
+    if [[ "$VASAK_UEFI" -eq 1 ]]; then
+        grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=vasak --recheck
+    else
+        grub-install --target=i386-pc "$VASAK_TARGET_DISK" --recheck
+    fi
+
+    # Glassmorphism theme (provided by vasak-artwork)
+    if [[ -d /usr/share/vasak/grub-theme ]]; then
+        mkdir -p /boot/grub/themes/vasak
+        cp -r /usr/share/vasak/grub-theme/. /boot/grub/themes/vasak/
+    fi
+
+    cat > /etc/default/grub <<GRUB_EOF
+GRUB_DEFAULT=0
+GRUB_TIMEOUT=3
+GRUB_DISTRIBUTOR="Vaşak Linux"
+GRUB_CMDLINE_LINUX_DEFAULT="quiet loglevel=3"
+GRUB_CMDLINE_LINUX="$GRUB_CMDLINE"
+GRUB_THEME="/boot/grub/themes/vasak/theme.txt"
+GRUB_GFXMODE=auto
+GRUB_GFXPAYLOAD_LINUX=keep
+GRUB_DISABLE_OS_PROBER=false
+GRUB_EOF
+
+    # With LUKS, the root filesystem UUID is only visible after the initramfs
+    # unlocks the container, so point GRUB at the mapper device instead.
+    if [[ "$VASAK_USE_LUKS" -eq 1 ]]; then
+        echo "GRUB_DISABLE_LINUX_UUID=true" >> /etc/default/grub
+    fi
+
+    grub-mkconfig -o /boot/grub/grub.cfg
+    echo "GRUB installed"
+fi
+
+# Mirror updates
+systemctl enable reflector.timer
+
+# Mark as installed by Vaşak
+echo "Installed by vasak-install $VASAK_VERSION on $(date)" > /etc/vasak-release
+CHROOT_EOF
+
+    run chmod +x "$TARGET_MOUNT/configure.sh"
+
+    info "Running: arch-chroot $TARGET_MOUNT /configure.sh"
+    env \
+        VASAK_HOSTNAME="$hostname" \
+        VASAK_USER="$username" \
+        VASAK_ROOT_PASS="$root_pass" \
+        VASAK_USER_PASS="$user_pass" \
+        VASAK_TZ="$tz" \
+        VASAK_LOCALE="$locale" \
+        VASAK_KEYMAP="$keymap" \
+        VASAK_BOOTLOADER="$bootloader_choice" \
+        VASAK_ROOT_PART="$ROOT_PART" \
+        VASAK_TARGET_DISK="$TARGET_DISK" \
+        VASAK_USE_LUKS="$USE_LUKS" \
+        VASAK_UEFI="$UEFI" \
+        VASAK_VERSION="$VERSION" \
+        arch-chroot "$TARGET_MOUNT" /configure.sh 2>&1 | tee -a "$LOG_FILE"
+
+    run rm "$TARGET_MOUNT/configure.sh"
+
+    ok "System configured"
+}
+
+# ============================================================
+# FINISH
+# ============================================================
+finish_install() {
+    title "INSTALLATION COMPLETE"
+    ok "Vaşak Linux installed successfully!"
+    info "You can now reboot into your new system."
+    info "Run: reboot"
+}
+
+# ============================================================
+# MAIN
+# ============================================================
+main() {
+    clear
+    cat <<'BANNER'
+   _____ _____ _____
+  |_   _|_   _|_   _|
+    | |   | |   | |
+    | |   | |   | |
+    |_|   |_|   |_|
+
+  Vaşak Linux Installer v0.2.0
+  "Badger doesn't care. Badger installs."
+BANNER
+    echo
+
+    check_root
+    check_archiso
+    check_internet
+
+    select_disk
+    partition_disk
+    format_partitions
+    mount_partitions
+    install_base
+    generate_fstab
+    configure_system
+    finish_install
+}
+
+main "$@"

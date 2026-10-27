@@ -1,0 +1,149 @@
+# Vaşak Linux Calamares Branding
+# Calamares branding description file
+
+componentName: "Vaşak Linux"
+version: "2025.01"
+shortVersion: "2025.01"
+defaultFont: "Noto Sans"
+windowIcon: "logo.svg"
+windowExpanding: true
+windowSize:
+    width: 900
+    height: 650
+
+# Colors (Nord theme inspired - dark, glassmorphism-ready)
+color:
+    # Main window background
+    background: "#1E1E2E"
+    # Text color
+    foreground: "#ECEFF4"
+    # Highlight/accent color (Vaşak teal)
+    highlight: "#88C0D0"
+    # Button background
+    buttonBackground: "#3B4252"
+    # Button text
+    buttonForeground: "#ECEFF4"
+    # Button hover
+    buttonHover: "#4C566A"
+    # Button pressed
+    buttonPressed: "#88C0D0"
+    # Sidebar background
+    sidebarBackground: "#282A36"
+    # Sidebar text
+    sidebarForeground: "#D8DEE9"
+    # Sidebar active
+    sidebarActive: "#88C0D0"
+    # Progress bar
+    progressBackground: "#3B4252"
+    progressForeground: "#88C0D0"
+    # Module background
+    moduleBackground: "#282A36"
+    # Module text
+    moduleForeground: "#ECEFF4"
+    # Warning color
+    warning: "#EBCB8B"
+    # Error color
+    error: "#BF616A"
+    # Success color
+    success: "#A3BE8C"
+
+# Images
+logo: "logo.svg"
+welcome: "welcome.png"
+background: "background.png"
+sidebar: "sidebar.png"
+
+# Squishy/glassmorphism feel - rounded corners
+styleSheet: |
+    QWidget {
+        background-color: #1E1E2E;
+        color: #ECEFF4;
+        font-family: "Noto Sans";
+    }
+    QPushButton {
+        background-color: #3B4252;
+        border: 1px solid #4C566A;
+        border-radius: 8px;
+        padding: 8px 16px;
+        color: #ECEFF4;
+        font-weight: 500;
+    }
+    QPushButton:hover {
+        background-color: #4C566A;
+        border-color: #88C0D0;
+    }
+    QPushButton:pressed {
+        background-color: #88C0D0;
+        color: #1E1E2E;
+    }
+    QPushButton:disabled {
+        background-color: #2E3440;
+        color: #4C566A;
+    }
+    QListWidget {
+        background-color: #282A36;
+        border: 1px solid #3B4252;
+        border-radius: 6px;
+        color: #ECEFF4;
+    }
+    QListWidget::item:selected {
+        background-color: #88C0D0;
+        color: #1E1E2E;
+    }
+    QLabel {
+        color: #ECEFF4;
+    }
+    QProgressBar {
+        background-color: #3B4252;
+        border: 1px solid #4C566A;
+        border-radius: 6px;
+        text-align: center;
+        color: #ECEFF4;
+    }
+    QProgressBar::chunk {
+        background-color: #88C0D0;
+        border-radius: 5px;
+    }
+    QComboBox {
+        background-color: #282A36;
+        border: 1px solid #4C566A;
+        border-radius: 6px;
+        padding: 6px;
+        color: #ECEFF4;
+    }
+    QLineEdit, QTextEdit, QSpinBox {
+        background-color: #282A36;
+        border: 1px solid #4C566A;
+        border-radius: 6px;
+        padding: 6px;
+        color: #ECEFF4;
+    }
+    QGroupBox {
+        border: 1px solid #3B4252;
+        border-radius: 8px;
+        margin-top: 12px;
+        color: #ECEFF4;
+    }
+    QGroupBox::title {
+        subcontrol-origin: margin;
+        left: 10px;
+        padding: 0 6px;
+        color: #88C0D0;
+    }
+    QScrollArea {
+        background-color: transparent;
+        border: none;
+    }
+    QScrollBar:vertical {
+        background-color: #282A36;
+        width: 10px;
+        border-radius: 5px;
+    }
+    QScrollBar::handle:vertical {
+        background-color: #4C566A;
+        border-radius: 5px;
+        min-height: 30px;
+    }
+    QScrollBar::handle:vertical:hover {
+        background-color: #88C0D0;
+    }

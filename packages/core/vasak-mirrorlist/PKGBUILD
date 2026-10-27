@@ -1,0 +1,21 @@
+# Maintainer: Vaşak Linux <twinboi@vasak-linux.org>
+pkgname=vasak-mirrorlist
+pkgver=20250101
+pkgrel=3
+pkgdesc="Vaşak Linux mirrorlist (Turkey-first) + [vasak] repo setup"
+arch=('any')
+url="https://github.com/Furkan-Tech26/Vasak-Linux-Pre-Alpha"
+license=('GPL')
+# Replaces the stock mirrorlist package instead of colliding with it.
+provides=('pacman-mirrorlist')
+conflicts=('pacman-mirrorlist')
+backup=('etc/pacman.d/mirrorlist' 'etc/pacman.d/mirrorlist-vasak')
+install=vasak-mirrorlist.install
+source=('mirrorlist' 'mirrorlist-vasak' 'vasak-mirrorlist.install')
+sha256sums=('SKIP' 'SKIP' 'SKIP')
+
+package() {
+	install -dm755 "$pkgdir/etc/pacman.d"
+	install -m644 "$srcdir/mirrorlist" "$pkgdir/etc/pacman.d/mirrorlist"
+	install -m644 "$srcdir/mirrorlist-vasak" "$pkgdir/etc/pacman.d/mirrorlist-vasak"
+}

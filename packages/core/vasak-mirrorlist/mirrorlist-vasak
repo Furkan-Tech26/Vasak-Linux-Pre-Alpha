@@ -1,0 +1,10 @@
+# Vaşak Linux custom repository ([vasak])
+# Packages maintained by the Vaşak team: keyring, installer, artwork, DE...
+#
+# The live ISO bundles every [vasak] package at /opt/vasak/repo and the text
+# installer copies that directory to the installed system, so this works
+# without network access.
+Server = file:///opt/vasak/repo
+
+# Online repo — enable this once the first package release is published:
+# Server = https://github.com/Furkan-Tech26/Vasak-Linux-Pre-Alpha/releases/download/pkg/$arch

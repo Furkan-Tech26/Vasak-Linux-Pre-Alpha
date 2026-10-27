@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+#
+# vpm — Vaşak Package Manager (pacman wrapper)
+# Usage: vpm [operation] [options] [packages]
+#
+# All arguments are passed directly to pacman.
+# vpm provides the same interface as pacman with Vaşak branding.
+#
+
+set -euo pipefail
+
+# Display usage if no arguments
+if [[ $# -eq 0 ]]; then
+	echo "Vaşak Package Manager (vpm) — pacman wrapper"
+	echo ""
+	echo "Usage: vpm [operation] [options] [targets]"
+	echo ""
+	echo "Operations:"
+	echo "  vpm -S, --sync      Install packages"
+	echo "  vpm -R, --remove    Remove packages"
+	echo "  vpm -Q, --query     Query the package database"
+	echo "  vpm -Ss             Search for packages"
+	echo "  vpm -Syu            Update all packages"
+	echo ""
+	echo "All pacman flags and options are supported."
+	echo "See pacman(8) for complete documentation."
+	exit 0
+fi
+
+# Pass through all arguments to pacman
+exec /usr/bin/pacman "$@"

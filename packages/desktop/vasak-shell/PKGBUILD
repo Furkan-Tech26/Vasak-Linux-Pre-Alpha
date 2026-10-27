@@ -1,0 +1,37 @@
+# Maintainer: Vaşak Linux <twinboi@vasak-linux.org>
+pkgname=vasak-shell
+pkgver=0.1.0
+pkgrel=1
+pkgdesc="Vaşak DE — Panel and Start Menu shell (GTK4, Wayland)"
+arch=('any')
+url="https://github.com/Furkan-Tech26/Vasak-Linux-Pre-Alpha"
+license=('GPL')
+depends=('gtk4' 'python-gobject' 'python-cairo' 'python-pyxdg' 'python-pillow')
+optdepends=('gtk4-layer-shell: proper Wayland panel anchoring and exclusive zone')
+source=()
+sha256sums=()
+
+package() {
+	# Main executable
+	install -dm755 "$pkgdir/usr/bin/"
+	cat > "$pkgdir/usr/bin/vasak-shell" <<'WRAPPER'
+#!/usr/bin/env python3
+import sys, os
+sys.path.insert(0, '/usr/share/vasak-shell')
+from main import main
+main()
+WRAPPER
+	chmod 755 "$pkgdir/usr/bin/vasak-shell"
+
+	# Application source (kept in app/ so it never collides with makepkg's src/)
+	install -dm755 "$pkgdir/usr/share/vasak-shell/"
+	cp -a "$startdir/app/." "$pkgdir/usr/share/vasak-shell/"
+
+	# Data
+	install -dm755 "$pkgdir/usr/share/vasak-shell/data/"
+	install -m644 "$startdir/data/shell.css" "$pkgdir/usr/share/vasak-shell/data/shell.css"
+
+	# Autostart
+	install -dm755 "$pkgdir/etc/xdg/autostart/"
+	install -m644 "$startdir/data/vasak-shell.desktop" "$pkgdir/etc/xdg/autostart/vasak-shell.desktop"
+}

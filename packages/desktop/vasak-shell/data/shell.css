@@ -1,0 +1,115 @@
+/* Vaşak Shell — Win 8.1 style panel & full-screen start menu */
+
+window {
+    border-radius: 12px;
+}
+
+/* ===== Panel ===== */
+.app-menu-button {
+    min-width: 44px;
+    min-height: 32px;
+    border-radius: 10px;
+    transition: all 200ms ease;
+}
+
+.app-menu-button:hover {
+    background-color: rgba(1.0, 1.0, 1.0, 0.12);
+}
+
+.app-menu-button:active {
+    background-color: rgba(1.0, 1.0, 1.0, 0.2);
+}
+
+.taskbar-title {
+    color: rgba(1, 1, 1, 0.9);
+    font-weight: 600;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+}
+
+.panel-clock {
+    color: rgba(1, 1, 1, 0.85);
+    font-weight: 500;
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+}
+
+/* ===== Start menu (full-screen) ===== */
+.group-bar {
+    background-color: transparent;
+}
+
+.group-label {
+    min-height: 32px;
+    padding: 0 14px;
+    border-radius: 4px;
+    background-color: rgba(1, 1, 1, 0.0);
+    color: rgba(1, 1, 1, 0.6);
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: 0.5px;
+    transition: all 150ms ease;
+}
+
+.group-label:hover {
+    background-color: rgba(1, 1, 1, 0.1);
+    color: rgba(1, 1, 1, 0.9);
+}
+
+.group-label:checked {
+    background-color: rgba(1, 1, 1, 0.18);
+    color: white;
+}
+
+/* Win 8.1 live tiles */
+.live-tile {
+    border-radius: 4px;
+    transition: transform 120ms ease, box-shadow 120ms ease, border 120ms ease;
+}
+
+.live-tile:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
+
+.live-tile:active {
+    transform: scale(0.97);
+}
+
+.live-tile-label {
+    color: white;
+    font-weight: 600;
+    font-size: 13px;
+}
+
+.live-tile-content {
+    color: rgba(1, 1, 1, 0.75);
+    font-size: 11px;
+}
+
+.startmenu-user {
+    color: rgba(1, 1, 1, 0.85);
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.startmenu-hint {
+    color: rgba(1, 1, 1, 0.5);
+    font-size: 12px;
+}
+
+/* Search entry in start menu */
+searchentry {
+    min-height: 40px;
+    border-radius: 4px;
+    background-color: rgba(1, 1, 1, 0.1);
+    border: 1px solid rgba(1, 1, 1, 0.2);
+    color: white;
+    font-size: 15px;
+    padding: 0 14px;
+}
+
+searchentry:focus {
+    border-color: rgba(0.39, 0.40, 0.95, 1.0);
+    background-color: rgba(1, 1, 1, 0.16);
+}

@@ -1,0 +1,50 @@
+# Vaşak Linux DE profile - extra packages on top of base
+# Base list is merged in automatically by build-iso.sh
+# vasak-de-meta pulls: vasak-shell, vasak-settings, vasak-theme,
+# vasak-session, labwc, swaybg, swayidle, swaylock, wlr-randr,
+# pipewire, wireplumber, mako
+
+# === Vaşak DE ===
+vasak-de-meta
+
+# === Wayland session + display manager ===
+xorg-server
+xorg-xinit
+mesa
+lightdm
+lightdm-gtk-greeter
+gtk4-layer-shell
+xdg-desktop-portal
+xdg-desktop-portal-wlr
+
+# === Desktop apps ===
+foot
+thunar
+mousepad
+firefox
+wofi
+network-manager-applet
+blueman
+bluez
+bluez-utils
+polkit-gnome
+pasystray
+
+# === Clipboard / utils ===
+wl-clipboard
+cliphist
+
+# === File associations / MIME ===
+xdg-user-dirs
+xdg-utils
+shared-mime-info
+
+# === Fonts ===
+noto-fonts
+noto-fonts-emoji
+ttf-liberation
+ttf-dejavu
+
+# === Themes / Icons (GTK) ===
+adwaita-icon-theme
+papirus-icon-theme

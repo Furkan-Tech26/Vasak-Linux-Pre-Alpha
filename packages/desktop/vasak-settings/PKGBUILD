@@ -1,0 +1,36 @@
+# Maintainer: Vaşak Linux <twinboi@vasak-linux.org>
+pkgname=vasak-settings
+pkgver=0.1.0
+pkgrel=1
+pkgdesc="Vaşak DE — Settings application (GTK4, libadwaita, glassmorphism)"
+arch=('any')
+url="https://github.com/Furkan-Tech26/Vasak-Linux-Pre-Alpha"
+license=('GPL')
+depends=('gtk4' 'libadwaita' 'python-gobject' 'python-cairo' 'python-pillow' 'vasak-shell')
+source=()
+sha256sums=()
+
+package() {
+	# Main executable
+	install -dm755 "$pkgdir/usr/bin/"
+	cat > "$pkgdir/usr/bin/vasak-settings" <<'WRAPPER'
+#!/usr/bin/env python3
+import sys, os
+sys.path.insert(0, '/usr/share/vasak-settings')
+from main import main
+main()
+WRAPPER
+	chmod 755 "$pkgdir/usr/bin/vasak-settings"
+
+	# Application source (kept in app/ so it never collides with makepkg's src/)
+	install -dm755 "$pkgdir/usr/share/vasak-settings/"
+	cp -a "$startdir/app/." "$pkgdir/usr/share/vasak-settings/"
+
+	# Data
+	install -dm755 "$pkgdir/usr/share/vasak-settings/data/"
+	install -m644 "$startdir/data/settings.css" "$pkgdir/usr/share/vasak-settings/data/settings.css"
+
+	# Desktop entry
+	install -dm755 "$pkgdir/usr/share/applications/"
+	install -m644 "$startdir/data/vasak-settings.desktop" "$pkgdir/usr/share/applications/vasak-settings.desktop"
+}

@@ -1,0 +1,9 @@
+# Vaşak Linux Plymouth Theme
+[Plymouth Theme]
+Name=Vaşak Linux
+Description=Glassmorphism boot splash for Vaşak Linux
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/vasak
+ScriptFile=/usr/share/plymouth/themes/vasak/vasak.script

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <!-- Vaşak Linux Logo - Badger (vaşak) silhouette -->
+  <!-- Replace with actual artwork later -->
+  <defs>
+    <linearGradient id="vasakGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2E3440;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#3B4252;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#4C566A;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="accentGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#88C0D0;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#81A1C1;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background circle -->
+  <circle cx="100" cy="100" r="95" fill="url(#vasakGradient)" stroke="url(#accentGradient)" stroke-width="3"/>
+
+  <!-- Badger silhouette (simplified geometric) -->
+  <g fill="url(#accentGradient)">
+    <!-- Body -->
+    <ellipse cx="100" cy="120" rx="35" ry="25"/>
+    <!-- Head -->
+    <ellipse cx="145" cy="100" rx="20" ry="18"/>
+    <!-- Snout -->
+    <ellipse cx="162" cy="100" rx="12" ry="8"/>
+    <!-- Ear -->
+    <path d="M135,80 Q140,60 150,80" fill="none" stroke="url(#accentGradient)" stroke-width="4" stroke-linecap="round"/>
+    <!-- Eye -->
+    <circle cx="150" cy="97" r="3" fill="#2E3440"/>
+    <!-- Stripe on face (badger characteristic) -->
+    <path d="M130,95 Q145,85 160,95" fill="none" stroke="#ECEFF4" stroke-width="5" stroke-linecap="round"/>
+    <path d="M130,105 Q145,115 160,105" fill="none" stroke="#ECEFF4" stroke-width="5" stroke-linecap="round"/>
+    <!-- Legs -->
+    <rect x="75" y="135" width="6" height="25" rx="3"/>
+    <rect x="90" y="135" width="6" height="25" rx="3"/>
+    <rect x="125" y="135" width="6" height="25" rx="3"/>
+    <rect x="140" y="135" width="6" height="25" rx="3"/>
+    <!-- Tail -->
+    <path d="M65,125 Q50,115 45,130" fill="none" stroke="url(#accentGradient)" stroke-width="8" stroke-linecap="round"/>
+  </g>
+
+  <!-- Text -->
+  <text x="100" y="180" font-family="sans-serif" font-size="16" font-weight="bold" fill="#ECEFF4" text-anchor="middle">VAŞAK LINUX</text>
+</svg>

@@ -1,0 +1,63 @@
+# Maintainer: Vaşak Linux <twinboi@vasak-linux.org>
+pkgname=vasak-calamares
+pkgver=20250101
+pkgrel=1
+pkgdesc="Vaşak Linux Calamares installer configuration"
+arch=('any')
+url="https://github.com/Furkan-Tech26/Vasak-Linux-Pre-Alpha"
+license=('GPL')
+depends=('calamares' 'qt6-svg' 'yaml-cpp' 'plymouth')
+makedepends=('librsvg')
+install=vasak-calamares.install
+source=()
+sha256sums=()
+
+build() {
+	# Convert Calamares branding SVGs to PNGs
+	rm -rf "$srcdir/raster"
+	mkdir -p "$srcdir/raster"
+
+	# Welcome screen (900x650)
+	rsvg-convert -w 900 -h 650 "$startdir/branding/vasak/welcome.svg" -o "$srcdir/raster/welcome.png"
+
+	# Background (900x650)
+	rsvg-convert -w 900 -h 650 "$startdir/branding/vasak/background.svg" -o "$srcdir/raster/background.png"
+
+	# Sidebar (280x650)
+	rsvg-convert -w 280 -h 650 "$startdir/branding/vasak/sidebar.svg" -o "$srcdir/raster/sidebar.png"
+
+	# Logo (200x200)
+	rsvg-convert -w 200 -h 200 "$startdir/branding/vasak/logo.svg" -o "$srcdir/raster/logo.png"
+}
+
+package() {
+	# Calamares settings
+	install -dm755 "$pkgdir/etc/calamares/"
+	install -m644 "$startdir/settings.conf" "$pkgdir/etc/calamares/settings.conf"
+
+	# Branding
+	install -dm755 "$pkgdir/usr/share/calamares/branding/vasak/"
+	install -m644 "$startdir/branding/vasak/branding.desc" "$pkgdir/usr/share/calamares/branding/vasak/branding.desc"
+	install -m644 "$startdir/branding/vasak/logo.svg" "$pkgdir/usr/share/calamares/branding/vasak/logo.svg"
+	install -m644 "$srcdir/raster/welcome.png" "$pkgdir/usr/share/calamares/branding/vasak/welcome.png"
+	install -m644 "$srcdir/raster/background.png" "$pkgdir/usr/share/calamares/branding/vasak/background.png"
+	install -m644 "$srcdir/raster/sidebar.png" "$pkgdir/usr/share/calamares/branding/vasak/sidebar.png"
+
+	# Modules
+	install -dm755 "$pkgdir/usr/share/calamares/modules/"
+	install -m644 "$startdir/modules/partition.conf" "$pkgdir/usr/share/calamares/modules/partition.conf"
+	install -m644 "$startdir/modules/package.conf" "$pkgdir/usr/share/calamares/modules/package.conf"
+	install -m644 "$startdir/modules/users.conf" "$pkgdir/usr/share/calamares/modules/users.conf"
+	install -m644 "$startdir/modules/locale.conf" "$pkgdir/usr/share/calamares/modules/locale.conf"
+	install -m644 "$startdir/modules/keyboard.conf" "$pkgdir/usr/share/calamares/modules/keyboard.conf"
+	install -m644 "$startdir/modules/bootloader.conf" "$pkgdir/usr/share/calamares/modules/bootloader.conf"
+	install -m644 "$startdir/modules/services.conf" "$pkgdir/usr/share/calamares/modules/services.conf"
+	install -m644 "$startdir/modules/finished.conf" "$pkgdir/usr/share/calamares/modules/finished.conf"
+	install -m644 "$startdir/modules/welcome.conf" "$pkgdir/usr/share/calamares/modules/welcome.conf"
+	install -m644 "$startdir/modules/plymouth.conf" "$pkgdir/usr/share/calamares/modules/plymouth.conf"
+
+	# Custom bootloader-choice module
+	install -dm755 "$pkgdir/usr/share/calamares/modules/bootloader-choice/"
+	install -m644 "$startdir/modules/bootloader-choice/main.py" "$pkgdir/usr/share/calamares/modules/bootloader-choice/main.py"
+	install -m644 "$startdir/modules/bootloader-choice/module.desc" "$pkgdir/usr/share/calamares/modules/bootloader-choice/module.desc"
+}

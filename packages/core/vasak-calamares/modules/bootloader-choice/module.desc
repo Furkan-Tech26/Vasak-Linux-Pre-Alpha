@@ -1,0 +1,7 @@
+# Vaşak Linux - Bootloader Choice Module Descriptor
+name: "bootloader-choice"
+version: 1
+description: "Vaşak Linux bootloader selection (systemd-boot, GRUB, both) and Plymouth option"
+license: "GPL-3.0-or-later"
+supportedModes: ["install", "live"]
+mainModule: "main"

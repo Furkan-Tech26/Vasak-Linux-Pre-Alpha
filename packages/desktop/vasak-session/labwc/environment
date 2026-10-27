@@ -1,0 +1,17 @@
+# Vaşak labwc environment
+
+export XDG_CURRENT_DESKTOP=Vaşak
+export XDG_SESSION_DESKTOP=Vaşak
+export XDG_SESSION_TYPE=wayland
+export GDK_BACKEND=wayland
+export CLUTTER_BACKEND=wayland
+export QT_QPA_PLATFORM=wayland
+export SDL_VIDEODRIVER=wayland
+export MOZ_ENABLE_WAYLAND=1
+export GTK_THEME=Vasak-Glass:dark
+
+# Vaşak shell / settings paths
+export VASAK_SHELL_CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}/vasak-shell/config.json"
+
+# PipeWire / WirePlumber
+export PIPEWIRE_LATENCY="1024/48000"

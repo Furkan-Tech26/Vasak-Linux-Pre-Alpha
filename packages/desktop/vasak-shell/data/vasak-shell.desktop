@@ -1,0 +1,12 @@
+[Desktop Entry]
+Name=Vaşak Shell
+GenericName=Vaşak DE Shell
+Comment=Vaşak Desktop Environment panel and start menu
+Exec=vasak-shell
+Icon=vasak-logo
+Terminal=false
+Type=Application
+Categories=DesktopSettings;System;
+X-GNOME-Autostart-Phase=Initialization
+X-GNOME-Autostart-Notify=true
+X-labwc-autostart=true

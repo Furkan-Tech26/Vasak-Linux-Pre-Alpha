@@ -1,0 +1,12 @@
+
+   Vaşak Linux — Live Environment
+   ==============================
+
+   Install:   vasak-install
+   Package:   vpm -Syu          (pacman wrapper)
+   Desktop:   systemctl start lightdm   (xfce / vasak ISOs)
+              vasak-session             (Vaşak DE from tty, labwc)
+
+   Root login has no password on the live medium.
+
+   "Badger doesn't care. Badger builds."

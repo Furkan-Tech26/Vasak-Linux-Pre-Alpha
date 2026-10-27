@@ -1,0 +1,5 @@
+# Vaşak Linux custom repository ([vasak])
+# This file is rewritten by build-iso.sh to point at the local repo
+# when building an ISO. The URL below is the public fallback.
+
+Server = https://github.com/Furkan-Tech26/Vasak-Linux-Pre-Alpha/releases/download/pkg/$arch

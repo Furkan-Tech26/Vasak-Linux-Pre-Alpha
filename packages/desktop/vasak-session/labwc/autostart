@@ -1,0 +1,44 @@
+#!/bin/sh
+# Vaşak labwc autostart — launched by vasak-session
+
+# Start the Vaşak shell panel (GTK4 layer-shell)
+vasak-shell &
+
+# Set wallpaper via swaybg (PNG raster from vasak-theme)
+WALLPAPER=/usr/share/backgrounds/vasak/glass.png
+[ -f "$WALLPAPER" ] || WALLPAPER=/usr/share/backgrounds/vasak/default.png
+[ -f "$WALLPAPER" ] || WALLPAPER=/usr/share/backgrounds/vasak/default.jpg
+if [ -f "$WALLPAPER" ]; then
+    swaybg -i "$WALLPAPER" -m fill &
+fi
+
+# Idle handling / lock
+if command -v swayidle >/dev/null 2>&1 && command -v swaylock >/dev/null 2>&1; then
+    swayidle -w \
+        timeout 300 'swaylock -f -c 1e1e24' \
+        before-sleep 'swaylock -f -c 1e1e24' &
+fi
+
+# Notification daemon
+command -v mako >/dev/null 2>&1 && mako &
+
+# Polkit authentication agent (first one found wins)
+for agent in \
+    /usr/lib/polkit-gnome-authentication-agent-1 \
+    /usr/lib/polkit-kde-authentication-agent-1 \
+    /usr/lib/polkit-kde-polkit-agent-1
+do
+    if [ -x "$agent" ]; then
+        "$agent" &
+        break
+    fi
+done
+
+# Network / sound applets
+command -v nm-applet >/dev/null 2>&1 && nm-applet --indicator &
+command -v pasystray >/dev/null 2>&1 && pasystray &
+
+# Clipboard history (optional)
+if command -v wl-paste >/dev/null 2>&1 && command -v cliphist >/dev/null 2>&1; then
+    wl-paste --watch cliphist store &
+fi

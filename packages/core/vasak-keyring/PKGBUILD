@@ -1,0 +1,38 @@
+# Maintainer: Vaşak Linux <twinboi@vasak-linux.org>
+pkgname=vasak-keyring
+pkgver=20250101
+pkgrel=2
+pkgdesc="Vaşak Linux PGP keyring (auto-generated locally)"
+arch=('any')
+url="https://github.com/Furkan-Tech26/Vasak-Linux-Pre-Alpha"
+license=('GPL')
+# pacman-key needs gpg available when the install scriptlet runs
+depends=('gnupg')
+makedepends=('gnupg')
+install=vasak-keyring.install
+source=()
+sha256sums=()
+
+build() {
+	# Generate a local keyring for testing
+	local tmpdir=$(mktemp -d)
+	export GNUPGHOME="$tmpdir"
+
+	gpg --batch --passphrase '' --generate-key <<EOF
+%no-protection
+Key-Type: RSA
+Key-Length: 2048
+Name-Real: Vaşak Linux Build Key
+Name-Email: build@vasak-linux.org
+Expire-Date: 0
+%commit
+EOF
+
+	gpg --export --armor "Vaşak Linux Build Key" > "$startdir/vasak.gpg"
+	rm -rf "$tmpdir"
+}
+
+package() {
+	install -dm755 "$pkgdir/usr/share/pacman/keyrings/"
+	install -m644 "$startdir/vasak.gpg" "$pkgdir/usr/share/pacman/keyrings/vasak.gpg"
+}

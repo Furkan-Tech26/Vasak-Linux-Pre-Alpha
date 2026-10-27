@@ -1,0 +1,43 @@
+#!/bin/sh
+#
+# vasak-session — Vaşak DE Wayland session launcher
+# Used by the vasak-de.desktop wayland-session entry
+#
+
+set -eu
+
+CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
+
+# A TTY login (including root on the live ISO) may not have a runtime dir.
+if [ -z "${XDG_RUNTIME_DIR:-}" ]; then
+    XDG_RUNTIME_DIR="/run/user/$(id -u)"
+    export XDG_RUNTIME_DIR
+    mkdir -p "$XDG_RUNTIME_DIR"
+    chmod 700 "$XDG_RUNTIME_DIR"
+fi
+
+# Install labwc defaults on first login
+LABWC_DIR="$CONFIG_HOME/labwc"
+if [ ! -f "$LABWC_DIR/rc.xml" ]; then
+    mkdir -p "$LABWC_DIR"
+    cp /etc/xdg/vasak/labwc/rc.xml "$LABWC_DIR/rc.xml"
+    cp /etc/xdg/vasak/labwc/environment "$LABWC_DIR/environment"
+    cp /etc/xdg/vasak/labwc/autostart "$LABWC_DIR/autostart"
+    chmod +x "$LABWC_DIR/autostart"
+fi
+
+# Source session environment (if present)
+if [ -f "$LABWC_DIR/environment" ]; then
+    . "$LABWC_DIR/environment"
+fi
+
+export XDG_CURRENT_DESKTOP="${XDG_CURRENT_DESKTOP:-Vaşak}"
+export XDG_SESSION_DESKTOP="${XDG_SESSION_DESKTOP:-Vaşak}"
+export XDG_SESSION_TYPE="${XDG_SESSION_TYPE:-wayland}"
+
+# Launch labwc (reads rc.xml/autostart/environment from $LABWC_DIR)
+# Give applets/polkit/notifications a session bus when one is not already set.
+if command -v dbus-run-session >/dev/null 2>&1 && [ -z "${DBUS_SESSION_BUS_ADDRESS:-}" ]; then
+    exec dbus-run-session -- labwc
+fi
+exec labwc

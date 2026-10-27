@@ -1,0 +1,1 @@
+"""Vaşak Settings pages subpackage."""

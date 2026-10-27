@@ -1,0 +1,15 @@
+post_install() {
+	# Append the [vasak] repo to pacman.conf if it isn't there yet
+	if ! grep -q '^\[vasak\]' /etc/pacman.conf; then
+		{
+			echo ""
+			echo "[vasak]"
+			echo "SigLevel = Optional TrustAll"
+			echo "Include = /etc/pacman.d/mirrorlist-vasak"
+		} >> /etc/pacman.conf
+	fi
+}
+
+post_upgrade() {
+	post_install "$@"
+}

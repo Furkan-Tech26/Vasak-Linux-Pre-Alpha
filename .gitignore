@@ -1,0 +1,20 @@
+# Build artifacts
+*.pkg.tar.zst
+*-debug-*.pkg.tar.zst
+build/
+iso-profiles/*/work/
+iso-profiles/*/out/
+*.sig
+*.asc
+
+# Pacman
+# pkg/ and src/ are makepkg working directories. Never keep real package
+# sources in src/ (use app/ or top-level directories) or they will be ignored.
+pkg/
+src/
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

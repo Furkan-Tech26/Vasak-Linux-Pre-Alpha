@@ -1,0 +1,8 @@
+post_install() {
+    # Update Calamares module list
+    calamares --debug 2>/dev/null | head -1 || true
+}
+
+post_upgrade() {
+    post_install
+}

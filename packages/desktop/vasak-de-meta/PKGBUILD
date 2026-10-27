@@ -1,0 +1,29 @@
+# Maintainer: Vaşak Linux <twinboi@vasak-linux.org>
+pkgname=vasak-de-meta
+pkgver=0.1.0
+pkgrel=1
+pkgdesc="Vaşak Desktop Environment — full meta-package (shell, settings, theme, session)"
+arch=('any')
+url="https://github.com/Furkan-Tech26/Vasak-Linux-Pre-Alpha"
+license=('GPL')
+depends=(
+	'vasak-shell'
+	'vasak-settings'
+	'vasak-theme'
+	'vasak-session'
+	'labwc'
+	'swaybg'
+	'swayidle'
+	'swaylock'
+	'wlr-randr'
+	'pipewire'
+	'wireplumber'
+	'mako'
+)
+source=()
+sha256sums=()
+
+package() {
+	# Meta-package: installs nothing of its own, just pulls dependencies
+	:
+}

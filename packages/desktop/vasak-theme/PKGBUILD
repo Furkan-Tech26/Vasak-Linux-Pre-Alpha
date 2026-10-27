@@ -1,0 +1,42 @@
+# Maintainer: Vaşak Linux <twinboi@vasak-linux.org>
+pkgname=vasak-theme
+pkgver=0.1.0
+pkgrel=1
+pkgdesc="Vaşak DE — Glassmorphism GTK4 theme (dark + light variants)"
+arch=('any')
+url="https://github.com/Furkan-Tech26/Vasak-Linux-Pre-Alpha"
+license=('CC-BY-SA-4.0')
+depends=('gtk4')
+makedepends=('librsvg')
+source=()
+sha256sums=()
+
+build() {
+	rm -rf "$srcdir/raster"
+	mkdir -p "$srcdir/raster"
+	for name in default glass dark; do
+		rsvg-convert -w 1920 -h 1080 "$startdir/wallpapers/vasak-${name}.svg" \
+			-o "$srcdir/raster/${name}.png"
+	done
+}
+
+package() {
+	# GTK4 theme
+	install -dm755 "$pkgdir/usr/share/themes/Vasak-Glass/gtk-4.0/"
+	install -m644 "$startdir/gtk-4.0/gtk.css" "$pkgdir/usr/share/themes/Vasak-Glass/gtk-4.0/gtk.css"
+	install -m644 "$startdir/gtk-4.0/gtk-dark.css" "$pkgdir/usr/share/themes/Vasak-Glass/gtk-4.0/gtk-dark.css"
+
+	# Wallpapers (SVG sources + PNG rasters for swaybg)
+	install -dm755 "$pkgdir/usr/share/backgrounds/vasak/"
+	# NOTE: default.png belongs to vasak-artwork (avoids a package file conflict).
+	install -m644 "$startdir/wallpapers/vasak-default.svg" "$pkgdir/usr/share/backgrounds/vasak/default.svg"
+	install -m644 "$startdir/wallpapers/vasak-glass.svg" "$pkgdir/usr/share/backgrounds/vasak/glass.svg"
+	install -m644 "$startdir/wallpapers/vasak-dark.svg" "$pkgdir/usr/share/backgrounds/vasak/dark.svg"
+	install -m644 "$srcdir/raster/glass.png" "$pkgdir/usr/share/backgrounds/vasak/glass.png"
+	install -m644 "$srcdir/raster/dark.png" "$pkgdir/usr/share/backgrounds/vasak/dark.png"
+
+	# Icons
+	install -dm755 "$pkgdir/usr/share/icons/hicolor/scalable/apps/"
+	install -m644 "$startdir/icons/vasak-settings.svg" "$pkgdir/usr/share/icons/hicolor/scalable/apps/vasak-settings.svg"
+	install -m644 "$startdir/icons/vasak-startmenu.svg" "$pkgdir/usr/share/icons/hicolor/scalable/apps/vasak-startmenu.svg"
+}

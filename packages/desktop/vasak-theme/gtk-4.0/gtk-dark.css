@@ -1,0 +1,100 @@
+/* Vaşak Glass Dark — GTK4 dark theme */
+
+@define-color bg_color #1e1e24;
+@define-color panel_color rgba(30, 30, 36, 0.82);
+@define-color accent_color #6366f1;
+@define-color text_color #e5e7eb;
+@define-color muted_color #9ca3af;
+
+* {
+    -GtkWidget-window-padding: 0;
+    -GtkWidget-window-margin: 0;
+}
+
+window {
+    background-color: @bg_color;
+    border-radius: 12px;
+    color: @text_color;
+}
+
+frame {
+    border: none;
+    border-radius: 12px;
+    background-color: rgba(255, 255, 255, 0.06);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+button {
+    border-radius: 8px;
+    min-height: 34px;
+    padding: 0 14px;
+    background-color: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: @text_color;
+    font-weight: 500;
+    transition: all 150ms ease;
+}
+
+button:hover {
+    background-color: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+button:checked,
+button:active {
+    background-color: @accent_color;
+    border-color: @accent_color;
+    color: white;
+}
+
+entry,
+spinbutton,
+combobox {
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background-color: rgba(255, 255, 255, 0.05);
+    padding: 6px 10px;
+    color: @text_color;
+}
+
+scale trough {
+    border-radius: 6px;
+    background-color: rgba(255, 255, 255, 0.08);
+    min-height: 8px;
+}
+
+scale slider {
+    border-radius: 6px;
+    background-color: @accent_color;
+    min-width: 20px;
+    min-height: 20px;
+}
+
+switch slider {
+    border-radius: 16px;
+    background-color: rgba(255, 255, 255, 0.12);
+}
+
+switch slider:checked {
+    background-color: @accent_color;
+}
+
+menu {
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background-color: rgba(30, 30, 36, 0.9);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    color: @text_color;
+}
+
+menubutton {
+    border-radius: 8px;
+}
+
+.tooltip {
+    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.9);
+    color: @bg_color;
+    padding: 6px 10px;
+    font-size: 11px;
+}

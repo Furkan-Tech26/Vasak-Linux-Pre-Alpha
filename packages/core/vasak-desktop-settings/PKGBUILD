@@ -1,0 +1,31 @@
+# Maintainer: Vaşak Linux <twinboi@vasak-linux.org>
+pkgname=vasak-desktop-settings
+pkgver=20250101
+pkgrel=2
+pkgdesc="Vaşak Linux desktop settings (XFCE + future custom DE)"
+arch=('any')
+url="https://github.com/Furkan-Tech26/Vasak-Linux-Pre-Alpha"
+license=('GPL')
+depends=('xfconf' 'lightdm' 'lightdm-gtk-greeter' 'adw-gtk-theme' 'papirus-icon-theme' 'noto-fonts' 'noto-fonts-emoji')
+install=vasak-desktop-settings.install
+source=(
+    'vasak-desktop-settings.install'
+    '10-vasak-xfce.conf'
+    'lightdm.conf'
+    'lightdm-gtk-greeter.conf'
+)
+sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP')
+
+package() {
+    # XFCE settings
+    install -dm755 "$pkgdir/etc/xdg/xfce4/xfconf/xfce-perchannel-xml/"
+    install -m644 "$srcdir/10-vasak-xfce.conf" "$pkgdir/etc/xdg/xfce4/xfconf/xfce-perchannel-xml/xfce4-desktop.xml"
+
+	# LightDM settings
+	# Installed under /usr/share/vasak and copied by the .install script so the
+	# package does not ship files owned by lightdm / lightdm-gtk-greeter
+	# (same-transaction file conflicts would make pacstrap fail).
+	install -dm755 "$pkgdir/usr/share/vasak/lightdm/"
+	install -m644 "$srcdir/lightdm.conf" "$pkgdir/usr/share/vasak/lightdm/lightdm.conf"
+	install -m644 "$srcdir/lightdm-gtk-greeter.conf" "$pkgdir/usr/share/vasak/lightdm/lightdm-gtk-greeter.conf"
+}

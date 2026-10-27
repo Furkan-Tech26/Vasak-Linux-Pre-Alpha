@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1e1e24;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#4f46e5;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="1920" height="1080" fill="url(#grad)" />
+  <circle cx="960" cy="540" r="400" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="4" />
+  <circle cx="960" cy="540" r="600" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="2" />
+  <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="white" font-family="sans-serif" font-size="48" font-weight="600" opacity="0.9">Vaşak Linux</text>
+  <text x="50%" y="58%" dominant-baseline="middle" text-anchor="middle" fill="white" font-family="sans-serif" font-size="20" opacity="0.55">Badger doesn't care. Badger builds.</text>
+</svg>
