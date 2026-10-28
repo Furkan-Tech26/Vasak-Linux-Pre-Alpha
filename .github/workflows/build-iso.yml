@@ -20,8 +20,10 @@ on:
 permissions:
   contents: read
 
+# Keyed on profile as well as ref: otherwise a second profile dispatched on the
+# same branch would cancel the first build instead of running beside it.
 concurrency:
-  group: build-iso-${{ github.ref }}
+  group: build-iso-${{ github.ref }}-${{ github.event.inputs.profile || 'vasak' }}
   cancel-in-progress: true
 
 jobs:
