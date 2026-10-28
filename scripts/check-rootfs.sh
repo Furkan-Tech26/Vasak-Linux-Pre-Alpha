@@ -4,6 +4,8 @@
 #   profile: vasak (default), tty, base, xfce
 set -uo pipefail
 
+echo "check-rootfs.sh version: 20261028-1 (grep -F fix)"
+
 SFS="${1:?usage: check-rootfs.sh <airootfs.sfs> [profile]}"
 PROFILE="${2:-vasak}"
 
