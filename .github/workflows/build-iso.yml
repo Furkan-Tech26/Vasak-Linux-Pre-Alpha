@@ -133,6 +133,35 @@ jobs:
           print("labwc menu.xml packaging OK")
           PY
 
+          echo "== Live boot wiring =="
+          python3 - <<'PY'
+          import pathlib
+          import stat
+
+          base = pathlib.Path("iso-profiles/base/airootfs")
+          autologin = base / "etc/systemd/system/getty@tty1.service.d/autologin.conf"
+          profile = base / "root/.bash_profile"
+          session = pathlib.Path("packages/desktop/vasak-session/vasak-session")
+
+          text = autologin.read_text(encoding="utf-8")
+          if "--autologin root" not in text:
+              raise SystemExit(f"{autologin}: tty1 must auto-login root")
+          if "ExecStart=\n" not in text:
+              raise SystemExit(f"{autologin}: must reset the inherited ExecStart")
+
+          text = profile.read_text(encoding="utf-8")
+          if "vasak-session" not in text:
+              raise SystemExit(f"{profile}: does not start vasak-session")
+          if "/run/archiso/bootmnt" not in text:
+              raise SystemExit(f"{profile}: missing live-medium guard")
+          if "exec vasak-session" in text:
+              raise SystemExit(f"{profile}: must not exec, the shell is the fallback")
+
+          if not session.stat().st_mode & stat.S_IXUSR:
+              raise SystemExit(f"{session}: not executable")
+          print("live autologin + desktop autostart OK")
+          PY
+
       - name: Free disk space
         run: |
           sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL || true
