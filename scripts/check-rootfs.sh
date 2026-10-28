@@ -77,13 +77,15 @@ check_profile_files
 
 echo
 echo "== no bytecode shipped =="
-if grep -q "__pycache__" "$LIST"; then
-	printf '  FAIL __pycache__ present in the image\n'
-	# Show what matched
-	grep "__pycache__" "$LIST" | head -20 | sed 's/^/    /'
+# System Python installs its own __pycache__ in /usr/lib/python3.*/ - that's expected.
+# Only fail on __pycache__ in our own package directories.
+PYCACHE_MATCHES=$(grep "__pycache__" "$LIST" | grep -v "usr/lib/python3\." || true)
+if [ -n "$PYCACHE_MATCHES" ]; then
+	printf '  FAIL __pycache__ present in our packages\n'
+	echo "$PYCACHE_MATCHES" | head -20 | sed 's/^/    /'
 	fail=$((fail + 1))
 else
-	printf '  ok   no __pycache__\n'
+	printf '  ok   no __pycache__ in our packages (system python pycache ignored)\n'
 fi
 
 # --- content spot checks ---------------------------------------------------
@@ -128,7 +130,7 @@ check_file() {
     local pattern="$2"
     local msg_ok="$3"
     local msg_fail="$4"
-    if [ -f "$SRC/$file" ] && grep -q "$pattern" "$SRC/$file"; then
+    if [ -f "$SRC/$file" ] && grep -Fq "$pattern" "$SRC/$file"; then
         echo "  ok   $msg_ok"
     else
         echo "  FAIL $msg_fail"
