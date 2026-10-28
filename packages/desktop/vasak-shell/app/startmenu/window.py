@@ -3,11 +3,35 @@
 from gi.repository import Gtk, Gdk
 
 from layer import GdkLayerShell, HAS_LAYER_SHELL
-from cssutil import load_css
+from cssutil import load_css, css_rgba
 
 from startmenu.tile_grid import TileGrid
 from startmenu.search import SearchEntry
 from startmenu.group_bar import GroupBar
+
+
+def _set_exclusive_keyboard(window):
+    """Grab the keyboard while the overlay is mapped.
+
+    gtk4-layer-shell 1.2 renamed this API to ``set_keyboard_mode()``;
+    1.3 removed the old ``set_keyboard_interactivity()`` entirely.
+    Support both so the shell runs on old and new releases.
+    """
+    try:
+        set_mode = getattr(GdkLayerShell, "set_keyboard_mode", None)
+        if set_mode is not None:
+            mode_cls = getattr(GdkLayerShell, "KeyboardMode", None)
+            # KeyboardMode.EXCLUSIVE == 1
+            mode = getattr(mode_cls, "EXCLUSIVE", 1) if mode_cls else 1
+            set_mode(window, mode)
+            return
+
+        set_interactivity = getattr(GdkLayerShell, "set_keyboard_interactivity", None)
+        if set_interactivity is not None:
+            set_interactivity(window, True)
+    except Exception as exc:
+        # A missing keyboard grab must not take the whole shell down.
+        print("[vasak-shell] keyboard mode unavailable: %s" % exc)
 
 
 class StartMenuWindow(Gtk.Window):
@@ -22,6 +46,7 @@ class StartMenuWindow(Gtk.Window):
         self.set_title("Vaşak Menu")
         self.set_decorated(False)
         self.set_default_size(1280, 800)
+        self.add_css_class("vasak-startmenu")
 
         # Layer-shell only makes sense for the full-screen (Win 8.1) mode
         use_layer = HAS_LAYER_SHELL and menu_cfg.get("fullscreen", True)
@@ -32,7 +57,7 @@ class StartMenuWindow(Gtk.Window):
             GdkLayerShell.set_anchor(self, GdkLayerShell.Edge.BOTTOM, True)
             GdkLayerShell.set_anchor(self, GdkLayerShell.Edge.LEFT, True)
             GdkLayerShell.set_anchor(self, GdkLayerShell.Edge.RIGHT, True)
-            GdkLayerShell.set_keyboard_interactivity(self, True)
+            _set_exclusive_keyboard(self)
             GdkLayerShell.set_exclusive_zone(self, -1)
         elif menu_cfg.get("fullscreen", True):
             self.fullscreen()
@@ -96,11 +121,11 @@ class StartMenuWindow(Gtk.Window):
         self._apply_css(menu_cfg)
 
     def _apply_css(self, menu_cfg):
-        bg = menu_cfg["bg_rgba"]
+        bg = css_rgba(menu_cfg["bg_rgba"])
         load_css(
             f"""
-            window {{
-                background-color: rgba({bg[0]}, {bg[1]}, {bg[2]}, {bg[3]});
+            .vasak-startmenu {{
+                background-color: {bg};
                 color: white;
                 font-family: 'Segoe UI', 'Noto Sans', sans-serif;
             }}
@@ -123,7 +148,9 @@ class StartMenuWindow(Gtk.Window):
         )
 
     def _on_key_pressed(self, controller, keyval, keycode, state):
-        if Gdk.keyval_name(keyval) == "Escape":
+        name = Gdk.keyval_name(keyval)
+        # Esc closes the menu; tapping Super again also closes it (Win 8.1).
+        if name == "Escape" or name in ("Super_L", "Super_R"):
             self.hide()
             return True
         return False

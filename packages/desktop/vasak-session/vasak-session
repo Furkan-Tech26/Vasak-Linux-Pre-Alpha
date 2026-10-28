@@ -21,9 +21,23 @@ LABWC_DIR="$CONFIG_HOME/labwc"
 if [ ! -f "$LABWC_DIR/rc.xml" ]; then
     mkdir -p "$LABWC_DIR"
     cp /etc/xdg/vasak/labwc/rc.xml "$LABWC_DIR/rc.xml"
+    cp /etc/xdg/vasak/labwc/menu.xml "$LABWC_DIR/menu.xml"
     cp /etc/xdg/vasak/labwc/environment "$LABWC_DIR/environment"
     cp /etc/xdg/vasak/labwc/autostart "$LABWC_DIR/autostart"
     chmod +x "$LABWC_DIR/autostart"
+fi
+
+# Migrate the brace-style pre-alpha config to valid labwc XML. User edits are
+# only replaced when the file is not an XML labwc config at all.
+if [ -f "$LABWC_DIR/rc.xml" ] && ! grep -q "<labwc_config" "$LABWC_DIR/rc.xml"; then
+    mv "$LABWC_DIR/rc.xml" "$LABWC_DIR/rc.xml.pre-xml"
+    cp /etc/xdg/vasak/labwc/rc.xml "$LABWC_DIR/rc.xml"
+    cp /etc/xdg/vasak/labwc/menu.xml "$LABWC_DIR/menu.xml"
+fi
+
+# Right-click menu is safe to install when missing (never overwrite user edits).
+if [ ! -f "$LABWC_DIR/menu.xml" ]; then
+    cp /etc/xdg/vasak/labwc/menu.xml "$LABWC_DIR/menu.xml"
 fi
 
 # Source session environment (if present)

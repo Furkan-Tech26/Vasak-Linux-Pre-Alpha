@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<!-- Vaşak Linux — labwc desktop right-click menu -->
+<openbox_menu>
+
+  <menu id="client-menu">
+    <item label="Minimize">
+      <action name="Iconify" />
+    </item>
+    <item label="Maximize">
+      <action name="ToggleMaximize" />
+    </item>
+    <item label="Fullscreen">
+      <action name="ToggleFullscreen" />
+    </item>
+    <item label="Always on Top">
+      <action name="ToggleAlwaysOnTop" />
+    </item>
+    <separator />
+    <item label="Close">
+      <action name="Close" />
+    </item>
+  </menu>
+
+  <menu id="root-menu">
+    <item label="Start Menu">
+      <action name="Execute" command="vasak-shell --toggle" />
+    </item>
+    <separator />
+    <item label="Terminal">
+      <action name="Execute" command="foot" />
+    </item>
+    <item label="Files">
+      <action name="Execute" command="thunar" />
+    </item>
+    <item label="Web Browser">
+      <action name="Execute" command="firefox" />
+    </item>
+    <item label="Settings">
+      <action name="Execute" command="vasak-settings" />
+    </item>
+    <separator />
+    <item label="Reconfigure">
+      <action name="Reconfigure" />
+    </item>
+  </menu>
+
+</openbox_menu>

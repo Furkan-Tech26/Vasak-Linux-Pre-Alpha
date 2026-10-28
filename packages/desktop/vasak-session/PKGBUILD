@@ -1,7 +1,7 @@
 # Maintainer: Vaşak Linux <twinboi@vasak-linux.org>
 pkgname=vasak-session
 pkgver=0.1.0
-pkgrel=1
+pkgrel=2
 pkgdesc="Vaşak DE — Session integration (labwc config, autostart, wayland-session entry)"
 arch=('any')
 url="https://github.com/Furkan-Tech26/Vasak-Linux-Pre-Alpha"
@@ -18,6 +18,7 @@ package() {
 	# labwc config
 	install -dm755 "$pkgdir/etc/xdg/vasak/labwc/"
 	install -m644 "$startdir/labwc/rc.xml" "$pkgdir/etc/xdg/vasak/labwc/rc.xml"
+	install -m644 "$startdir/labwc/menu.xml" "$pkgdir/etc/xdg/vasak/labwc/menu.xml"
 	install -m755 "$startdir/labwc/autostart" "$pkgdir/etc/xdg/vasak/labwc/autostart"
 	install -m644 "$startdir/labwc/environment" "$pkgdir/etc/xdg/vasak/labwc/environment"
 

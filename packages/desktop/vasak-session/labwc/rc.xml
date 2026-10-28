@@ -1,82 +1,126 @@
-# Vaşak labwc configuration
-# Glassmorphism Wayland compositor config
+<?xml version="1.0"?>
+<!--
+  Vaşak Linux — labwc compositor configuration
+  Openbox-3.6 compatible XML. See labwc-config(5).
+-->
+<labwc_config>
 
-# --- Input ---
-input {
-    repeat_delay 250
-    repeat_rate 25
-    pointer_accel adaptive
-    pointer_accel_adaptive_threshold 4
-}
+  <core>
+    <decoration>server</decoration>
+    <gap>8</gap>
+    <adaptiveSync>no</adaptiveSync>
+    <allowTearing>no</allowTearing>
+    <autoEnableOutputs>yes</autoEnableOutputs>
+  </core>
 
-# --- Appearance ---
-active_border_color #6366f1
-active_border_width 2
-inactive_border_color #333333
-inactive_border_width 1
-border_width 2
-background_color #1e1e24
-text_color #e5e7eb
+  <placement>
+    <policy>center</policy>
+  </placement>
 
-# --- Layout ---
-default_floating false
-new_window_center true
-xwayland_force_zero_scaling true
+  <theme>
+    <fallbackAppIcon>vasak-logo</fallbackAppIcon>
+    <cornerRadius>10</cornerRadius>
+    <keepBorder>yes</keepBorder>
+    <dropShadows>yes</dropShadows>
+    <titlebar>
+      <layout>icon:iconify,max,close</layout>
+      <showTitle>yes</showTitle>
+    </titlebar>
+    <font place="ActiveWindow">
+      <name>Noto Sans</name>
+      <size>10</size>
+      <slant>normal</slant>
+      <weight>bold</weight>
+    </font>
+    <font place="InactiveWindow">
+      <name>Noto Sans</name>
+      <size>10</size>
+      <slant>normal</slant>
+      <weight>normal</weight>
+    </font>
+    <font place="MenuHeader">
+      <name>Noto Sans</name>
+      <size>10</size>
+      <slant>normal</slant>
+      <weight>bold</weight>
+    </font>
+    <font place="MenuItem">
+      <name>Noto Sans</name>
+      <size>10</size>
+      <slant>normal</slant>
+      <weight>normal</weight>
+    </font>
+    <font place="OnScreenDisplay">
+      <name>Noto Sans</name>
+      <size>10</size>
+      <slant>normal</slant>
+      <weight>bold</weight>
+    </font>
+  </theme>
 
-# --- Workspaces ---
-workspace default default
-workspace 1 code
-workspace 2 web
-workspace 3 media
-workspace 4 sys
+  <desktops>
+    <popupTime>800</popupTime>
+    <names>
+      <name>Desktop 1</name>
+      <name>Desktop 2</name>
+      <name>Desktop 3</name>
+      <name>Desktop 4</name>
+    </names>
+  </desktops>
 
-workspace_layout default default
-workspace_layout 1 tile
-workspace_layout 2 tile
-workspace_layout 3 float
-workspace_layout 4 float
+  <keyboard>
+    <default />
+    <repeatRate>25</repeatRate>
+    <repeatDelay>300</repeatDelay>
 
-# --- Rules ---
-rule {
-    app_id = floorp
-    workspace = 2
-}
+    <!-- Windows 8.1 style: tap Super to toggle the full-screen start menu -->
+    <keybind key="Super_L" onRelease="yes">
+      <action name="Execute" command="vasak-shell --toggle" />
+    </keybind>
+    <keybind key="Super_R" onRelease="yes">
+      <action name="Execute" command="vasak-shell --toggle" />
+    </keybind>
+    <keybind key="W-space">
+      <action name="Execute" command="vasak-shell --toggle" />
+    </keybind>
 
-rule {
-    app_id = code-oss
-    workspace = 1
-}
+    <!-- Everyday launchers -->
+    <keybind key="W-Return">
+      <action name="Execute" command="foot" />
+    </keybind>
+    <keybind key="W-e">
+      <action name="Execute" command="thunar" />
+    </keybind>
+    <keybind key="W-i">
+      <action name="Execute" command="vasak-settings" />
+    </keybind>
+    <keybind key="W-l">
+      <action name="Execute" command="swaylock -f -c 1e1e24" />
+    </keybind>
+    <keybind key="W-S-r">
+      <action name="Reconfigure" />
+    </keybind>
 
-rule {
-    app_id = vasak-settings
-    floating true
-    size 800 520
-    center true
-}
+    <!-- Volume keys via WirePlumber (pipewire is part of the Vaşak DE) -->
+    <keybind key="XF86AudioRaiseVolume">
+      <action name="Execute" command="wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+" />
+    </keybind>
+    <keybind key="XF86AudioLowerVolume">
+      <action name="Execute" command="wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-" />
+    </keybind>
+    <keybind key="XF86AudioMute">
+      <action name="Execute" command="wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle" />
+    </keybind>
+  </keyboard>
 
-# --- Decorations ---
-decoration {
-    border_size 0
-    active_border_color #6366f1
-    inactive_border_color #333333
-    active_text_color #e5e7eb
-    inactive_text_color #9ca3af
-    title_format {title}
-    title_when_multiple false
-}
+  <windowRules>
+    <windowRule identifier="vasak-settings">
+      <action name="ResizeTo" width="960" height="640" />
+    </windowRule>
+  </windowRules>
 
-# --- Focus ---
-focus_new_windows true
-focus_wraps false
+  <menu>
+    <showIcons>yes</showIcons>
+  </menu>
 
-# --- Margins ---
-output * {
-    margin top 8
-    margin bottom 8
-    margin left 8
-    margin right 8
-    gap 8
-}
-
-# --- Panel (vasak-shell) layer ---
-# vasak-shell manages its own layer-shell surface
+</labwc_config>

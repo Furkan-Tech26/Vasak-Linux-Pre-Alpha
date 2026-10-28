@@ -1,13 +1,12 @@
 # Maintainer: Vaşak Linux <twinboi@vasak-linux.org>
 pkgname=vasak-shell
 pkgver=0.1.0
-pkgrel=1
+pkgrel=2
 pkgdesc="Vaşak DE — Panel and Start Menu shell (GTK4, Wayland)"
 arch=('any')
 url="https://github.com/Furkan-Tech26/Vasak-Linux-Pre-Alpha"
 license=('GPL')
-depends=('gtk4' 'python-gobject' 'python-cairo' 'python-pyxdg' 'python-pillow')
-optdepends=('gtk4-layer-shell: proper Wayland panel anchoring and exclusive zone')
+depends=('gtk4' 'gtk4-layer-shell' 'python-gobject' 'python-cairo' 'python-pyxdg' 'python-pillow')
 source=()
 sha256sums=()
 
@@ -19,7 +18,7 @@ package() {
 import sys, os
 sys.path.insert(0, '/usr/share/vasak-shell')
 from main import main
-main()
+sys.exit(main())
 WRAPPER
 	chmod 755 "$pkgdir/usr/bin/vasak-shell"
 

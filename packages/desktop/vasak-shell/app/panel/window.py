@@ -3,7 +3,7 @@
 from gi.repository import Gtk
 
 from layer import GdkLayerShell, HAS_LAYER_SHELL
-from cssutil import load_css
+from cssutil import load_css, css_rgba
 
 from panel.app_menu import AppMenuButton
 from panel.taskbar import Taskbar
@@ -36,6 +36,7 @@ class PanelWindow(Gtk.Window):
         self.set_title("Vaşak Panel")
         self.set_decorated(False)
         self.set_resizable(False)
+        self.add_css_class("vasak-panel")
 
         # Main horizontal box
         self.box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
@@ -75,13 +76,13 @@ class PanelWindow(Gtk.Window):
         self._apply_css(panel_cfg)
 
     def _apply_css(self, panel_cfg):
-        bg = panel_cfg["bg_rgba"]
-        border = panel_cfg["border_color"]
+        bg = css_rgba(panel_cfg["bg_rgba"])
+        border = css_rgba(panel_cfg["border_color"])
         load_css(
             f"""
-            window {{
-                background-color: rgba({bg[0]}, {bg[1]}, {bg[2]}, {bg[3]});
-                border: 1px solid rgba({border[0]}, {border[1]}, {border[2]}, {border[3]});
+            .vasak-panel {{
+                background-color: {bg};
+                border: 1px solid {border};
                 border-radius: {panel_cfg['corner_radius']}px;
             }}
             """

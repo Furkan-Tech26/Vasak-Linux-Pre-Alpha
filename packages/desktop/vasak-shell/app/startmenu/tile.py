@@ -5,7 +5,7 @@ import subprocess
 
 from gi.repository import Gtk, GLib
 
-from cssutil import load_css
+from cssutil import load_css, css_rgba
 
 # Win 8.1 tile size hints in grid columns/rows
 TILE_SIZES = {
@@ -94,6 +94,8 @@ class AppTile(Gtk.Box):
 
     def _apply_css(self):
         c = self.group_color
+        base = css_rgba(c)
+        active = css_rgba([c[0] * 0.85, c[1] * 0.85, c[2] * 0.85, c[3]])
         # Unique class per tile: a shared .live-tile background rule would make
         # every tile inherit the last-created provider's color.
         self._color_class = f"tile-color-{id(self)}"
@@ -101,14 +103,14 @@ class AppTile(Gtk.Box):
         load_css(
             f"""
             .{self._color_class} {{
-                background-color: rgba({c[0]}, {c[1]}, {c[2]}, {c[3]});
+                background-color: {base};
                 border: 1px solid rgba(255, 255, 255, 0.12);
             }}
             .{self._color_class}:hover {{
                 border-color: rgba(255, 255, 255, 0.5);
             }}
             .{self._color_class}:active {{
-                background-color: rgba({c[0]*0.85}, {c[1]*0.85}, {c[2]*0.85}, {c[3]});
+                background-color: {active};
             }}
             """
         )
@@ -118,6 +120,12 @@ class AppTile(Gtk.Box):
             subprocess.Popen(shlex.split(self.app["exec"]))
         except Exception as e:
             print(f"[vasak-shell] Failed to launch {self.app['name']}: {e}")
+            return
+
+        # Win 8.1 behaviour: launching an app closes the start menu.
+        root = self.get_root()
+        if isinstance(root, Gtk.Window):
+            root.hide()
 
     def _rotate_live(self):
         """Rotate live tile text (simple demo behavior)."""

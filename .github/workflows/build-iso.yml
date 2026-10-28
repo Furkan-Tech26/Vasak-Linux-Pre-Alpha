@@ -76,6 +76,61 @@ jobs:
           print("all SVGs parse")
           PY
 
+          echo "== Python syntax =="
+          python3 - <<'PY'
+          import ast
+          import pathlib
+          bad = []
+          count = 0
+          for p in pathlib.Path("packages").rglob("*.py"):
+              count += 1
+              try:
+                  ast.parse(p.read_text(encoding="utf-8"), filename=str(p))
+              except Exception as exc:
+                  bad.append(f"{p}: {exc}")
+          if bad:
+              raise SystemExit("\n".join(bad))
+          print(f"{count} Python files parse")
+          PY
+
+          echo "== labwc configuration =="
+          python3 - <<'PY'
+          import xml.etree.ElementTree as ET
+
+          rc_path = "packages/desktop/vasak-session/labwc/rc.xml"
+          menu_path = "packages/desktop/vasak-session/labwc/menu.xml"
+
+          for path, expected in ((rc_path, "labwc_config"),
+                                 (menu_path, "openbox_menu")):
+              root = ET.parse(path).getroot()
+              if root.tag != expected:
+                  raise SystemExit(f"{path}: expected <{expected}>, got <{root.tag}>")
+              print(f"{path}: <{root.tag}>")
+
+          rc = ET.parse(rc_path).getroot()
+          binds = rc.findall(".//keyboard/keybind")
+          by_key = {b.get("key"): b for b in binds}
+          for key in ("Super_L", "W-space"):
+              if key not in by_key:
+                  raise SystemExit(f"rc.xml: missing {key} start-menu keybind")
+          if by_key["Super_L"].get("onRelease") != "yes":
+              raise SystemExit("rc.xml: Super_L must use onRelease=yes")
+          action = ET.tostring(by_key["Super_L"], encoding="unicode")
+          if "vasak-shell --toggle" not in action:
+              raise SystemExit("rc.xml: Super_L does not toggle the Vaşak menu")
+          print("rc.xml: Super_L / W-space start-menu keybinds OK")
+
+          pkgbuild = open("packages/desktop/vasak-session/PKGBUILD",
+                          encoding="utf-8").read()
+          session = open("packages/desktop/vasak-session/vasak-session",
+                         encoding="utf-8").read()
+          if "labwc/menu.xml" not in pkgbuild:
+              raise SystemExit("vasak-session PKGBUILD does not install menu.xml")
+          if "/etc/xdg/vasak/labwc/menu.xml" not in session:
+              raise SystemExit("vasak-session does not seed menu.xml")
+          print("labwc menu.xml packaging OK")
+          PY
+
       - name: Free disk space
         run: |
           sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL || true
@@ -101,7 +156,26 @@ jobs:
               echo "== Installing build tools =="
               pacman -S --noconfirm --needed \
                 archiso base-devel git rsync sudo gawk namcap \
-                librsvg python-gobject gtk4
+                librsvg python-gobject gtk4 gtk4-layer-shell
+
+              echo "== GTK4 / layer-shell API smoke test =="
+              python - <<"PY"
+          import gi
+          gi.require_version("Gtk", "4.0")
+          gi.require_version("Gtk4LayerShell", "1.0")
+          from gi.repository import Gtk, Gtk4LayerShell
+          assert hasattr(Gtk, "init"), "Gtk.init missing"
+          assert hasattr(Gtk4LayerShell, "set_keyboard_mode"), "gtk4-layer-shell too old"
+          print("GTK4 + gtk4-layer-shell keyboard API OK")
+          PY
+
+              echo "== vasak-shell import smoke test =="
+              PYTHONPATH=/work/packages/desktop/vasak-shell/app python - <<"PY"
+          import main, ipc
+          assert main.main(["--version"]) == 0
+          assert callable(ipc.send_command)
+          print("vasak-shell modules import OK")
+          PY
 
               echo "== Preparing build user =="
               id builder &>/dev/null || useradd -m builder
