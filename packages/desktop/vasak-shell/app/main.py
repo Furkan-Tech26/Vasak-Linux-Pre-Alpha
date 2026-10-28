@@ -25,7 +25,13 @@ try:
 except Exception:
     pass
 
-from gi.repository import GLib, Gtk, Gdk
+# Pin GTK 4 explicitly. Without this, PyGObject binds whichever Gtk typelib
+# it finds first, so a system with GTK 3 also installed could load Gtk 3 and
+# the shell would fail with unrelated attribute errors.
+import gi
+
+gi.require_version("Gtk", "4.0")
+from gi.repository import GLib, Gtk, Gdk  # noqa: E402
 
 # Allow Ctrl+C to quit cleanly
 signal.signal(signal.SIGINT, signal.SIG_DFL)

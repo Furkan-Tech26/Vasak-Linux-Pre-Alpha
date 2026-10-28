@@ -1,7 +1,7 @@
 # Maintainer: Vaşak Linux <twinboi@vasak-linux.org>
 pkgname=vasak-shell
 pkgver=0.1.0
-pkgrel=3
+pkgrel=4
 pkgdesc="Vaşak DE — Panel and Start Menu shell (GTK4, Wayland)"
 arch=('any')
 url="https://github.com/Furkan-Tech26/Vasak-Linux-Pre-Alpha"
