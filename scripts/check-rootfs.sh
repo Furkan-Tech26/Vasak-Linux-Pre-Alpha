@@ -77,19 +77,22 @@ for f in etc/systemd/system/getty@tty1.service.d/autologin.conf root/.bash_profi
 	"$UNSQ" -q -d "$TMP" -e "$f" "$SFS" >/dev/null 2>&1
 done
 
-grep -q -- "--autologin root" "$TMP/etc/systemd/system/getty@tty1.service.d/autologin.conf" 2>/dev/null \
+# unsquashfs -d creates squashfs-root/ under the destination
+SRC="$TMP/squashfs-root"
+
+grep -q -- "--autologin root" "$SRC/etc/systemd/system/getty@tty1.service.d/autologin.conf" 2>/dev/null \
 	&& echo "  ok   tty1 auto-logins root" \
 	|| { echo "  FAIL tty1 autologin missing"; fail=$((fail + 1)); }
 
-grep -q "vasak-session" "$TMP/root/.bash_profile" 2>/dev/null \
+grep -q "vasak-session" "$SRC/root/.bash_profile" 2>/dev/null \
 	&& echo "  ok   profile starts vasak-session" \
 	|| { echo "  FAIL profile does not start the desktop"; fail=$((fail + 1)); }
 
-grep -q "<labwc_config" "$TMP/etc/xdg/vasak/labwc/rc.xml" 2>/dev/null \
+grep -q "<labwc_config" "$SRC/etc/xdg/vasak/labwc/rc.xml" 2>/dev/null \
 	&& echo "  ok   rc.xml is labwc XML" \
 	|| { echo "  FAIL rc.xml is not labwc XML"; fail=$((fail + 1)); }
 
-grep -q "vasak-shell" "$TMP/etc/xdg/vasak/labwc/autostart" 2>/dev/null \
+grep -q "vasak-shell" "$SRC/etc/xdg/vasak/labwc/autostart" 2>/dev/null \
 	&& echo "  ok   autostart launches the shell" \
 	|| { echo "  FAIL autostart does not launch the shell"; fail=$((fail + 1)); }
 

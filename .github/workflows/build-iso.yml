@@ -224,6 +224,11 @@ jobs:
               WORK_GID="$(stat -c %g /work)"
               chown -R builder:builder /work
 
+              echo "== Cleaning test bytecode from source tree =="
+              find /work -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
+              find /work -name "*.pyc" -delete 2>/dev/null || true
+              find /work -name "*.pyo" -delete 2>/dev/null || true
+
               echo "== Building [vasak] package repo =="
               su -s /bin/bash builder -c \
                 "sudo env VASAK_REPO_DIR=\"$VASAK_REPO_DIR\" ./build-repo.sh"
