@@ -92,28 +92,40 @@ echo
 echo "== file contents =="
 SRC="$TMP/squashfs-root"
 
-# Extract files for content checks
+# Extract files for content checks with debug
 for f in etc/systemd/system/getty@tty1.service.d/autologin.conf root/.bash_profile \
 	 etc/xdg/vasak/labwc/rc.xml etc/xdg/vasak/labwc/autostart; do
-	"$UNSQ" -q -d "$TMP" -e "$f" "$SFS" >/dev/null 2>&1
+	"$UNSQ" -d "$TMP" -e "$f" "$SFS" >/dev/null 2>&1
 done
 
-grep -q -- "--autologin root" "$SRC/etc/systemd/system/getty@tty1.service.d/autologin.conf" 2>/dev/null \
-	&& echo "  ok   tty1 auto-logins root" \
-	|| { echo "  FAIL tty1 autologin missing"; fail=$((fail + 1)); }
+# Debug: list what was extracted
+if [ -d "$SRC" ]; then
+	echo "  Extracted tree:"
+	find "$SRC" -type f | sed "s|^|    |"
+else
+	echo "  WARNING: $SRC not created"
+fi
 
-grep -q "vasak-session" "$SRC/root/.bash_profile" 2>/dev/null \
-	&& echo "  ok   profile starts vasak-session" \
-	|| { echo "  FAIL profile does not start the desktop"; fail=$((fail + 1)); }
+check_file() {
+	local file="$1"
+	local pattern="$2"
+	local msg_ok="$3"
+	local msg_fail="$4"
+	if [ -f "$SRC/$file" ] && grep -q "$pattern" "$SRC/$file"; then
+		echo "  ok   $msg_ok"
+	else
+		echo "  FAIL $msg_fail"
+		[ -f "$SRC/$file" ] && echo "       (file exists but pattern not found)" || echo "       (file not extracted)"
+		fail=$((fail + 1))
+	fi
+}
+
+check_file "etc/systemd/system/getty@tty1.service.d/autologin.conf" "--autologin root" "tty1 auto-logins root" "tty1 autologin missing"
+check_file "root/.bash_profile" "vasak-session" "profile starts vasak-session" "profile does not start the desktop"
 
 if [ "$PROFILE" = "vasak" ] || [ "$PROFILE" = "xfce" ]; then
-	grep -q "<labwc_config" "$SRC/etc/xdg/vasak/labwc/rc.xml" 2>/dev/null \
-		&& echo "  ok   rc.xml is labwc XML" \
-		|| { echo "  FAIL rc.xml is not labwc XML"; fail=$((fail + 1)); }
-
-	grep -q "vasak-shell" "$SRC/etc/xdg/vasak/labwc/autostart" 2>/dev/null \
-		&& echo "  ok   autostart launches the shell" \
-		|| { echo "  FAIL autostart does not launch the shell"; fail=$((fail + 1)); }
+	check_file "etc/xdg/vasak/labwc/rc.xml" "<labwc_config" "rc.xml is labwc XML" "rc.xml is not labwc XML"
+	check_file "etc/xdg/vasak/labwc/autostart" "vasak-shell" "autostart launches the shell" "autostart does not launch the shell"
 fi
 
 echo

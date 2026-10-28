@@ -7,6 +7,7 @@ arch=('any')
 url="https://github.com/Furkan-Tech26/Vasak-Linux-Pre-Alpha"
 license=('GPL')
 depends=('gtk4' 'libadwaita' 'python-gobject' 'python-cairo' 'python-pillow' 'vasak-shell')
+makedepends=('rsync')
 source=()
 sha256sums=()
 
@@ -24,7 +25,8 @@ WRAPPER
 
 	# Application source (kept in app/ so it never collides with makepkg's src/)
 	install -dm755 "$pkgdir/usr/share/vasak-settings/"
-	cp -a "$startdir/app/." "$pkgdir/usr/share/vasak-settings/"
+	rsync -a --exclude="__pycache__" --exclude="*.pyc" --exclude="*.pyo" \
+		"$startdir/app/." "$pkgdir/usr/share/vasak-settings/"
 
 	# Data
 	install -dm755 "$pkgdir/usr/share/vasak-settings/data/"
