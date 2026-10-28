@@ -24,7 +24,8 @@ WRAPPER
 
 	# Application source (kept in app/ so it never collides with makepkg's src/)
 	install -dm755 "$pkgdir/usr/share/vasak-shell/"
-	cp -a "$startdir/app/." "$pkgdir/usr/share/vasak-shell/"
+	rsync -a --exclude="__pycache__" --exclude="*.pyc" --exclude="*.pyo" \
+		"$startdir/app/." "$pkgdir/usr/share/vasak-shell/"
 
 	# Data
 	install -dm755 "$pkgdir/usr/share/vasak-shell/data/"

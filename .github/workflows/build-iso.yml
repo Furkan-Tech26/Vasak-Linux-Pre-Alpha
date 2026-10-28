@@ -231,6 +231,17 @@ jobs:
               echo "== Building ISO: $PROFILE =="
               ./build-iso.sh "$PROFILE"
 
+              echo "== Verifying live root filesystem =="
+              ISO=$(ls iso-profiles/*/out/*.iso | head -1)
+              WORKDIR=$(mktemp -d)
+              bsdtar -xf "$ISO" -C "$WORKDIR" '*/x86_64/airootfs.sfs'
+              SFS=$(find "$WORKDIR" -name "airootfs.sfs" | head -1)
+              if [ -z "$SFS" ] || [ ! -f "$SFS" ]; then
+                  echo "FAIL: airootfs.sfs not found in ISO"
+                  exit 1
+              fi
+              bash /work/scripts/check-rootfs.sh "$SFS"
+
               # Files created by root inside the container must be readable by
               # the GitHub Actions runner user so the artifact upload works.
               chown -R "$WORK_UID:$WORK_GID" /work
