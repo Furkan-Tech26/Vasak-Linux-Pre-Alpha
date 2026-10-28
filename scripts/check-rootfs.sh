@@ -1,9 +1,11 @@
 #!/bin/bash
 # Verify the contents of the live root filesystem (airootfs.sfs).
-# Usage: check-rootfs.sh <airootfs.sfs>
+# Usage: check-rootfs.sh <airootfs.sfs> [profile]
+#   profile: vasak (default), tty, base, xfce
 set -uo pipefail
 
-SFS="${1:?usage: check-rootfs.sh <airootfs.sfs>}"
+SFS="${1:?usage: check-rootfs.sh <airootfs.sfs> [profile]}"
+PROFILE="${2:-vasak}"
 
 # Use the system unsquashfs (installed by archiso/mkarchiso)
 UNSQ="unsquashfs"
@@ -24,38 +26,54 @@ have() {
 	fi
 }
 
-echo
-echo "== live session wiring =="
-have "etc/systemd/system/getty@tty1.service.d/autologin.conf"
-have "root/.bash_profile"
-have "usr/bin/vasak-session"
-have "usr/bin/vasak-shell"
-have "usr/bin/vasak-settings"
-have "usr/bin/labwc"
-have "usr/share/wayland-sessions/vasak-de.desktop"
+# Profile-specific expected files
+check_profile_files() {
+	case "$PROFILE" in
+		vasak|xfce)
+			echo
+			echo "== live session wiring =="
+			have "etc/systemd/system/getty@tty1.service.d/autologin.conf"
+			have "root/.bash_profile"
+			have "usr/bin/vasak-session"
+			have "usr/bin/vasak-shell"
+			have "usr/bin/vasak-settings"
+			have "usr/bin/labwc"
+			have "usr/share/wayland-sessions/vasak-de.desktop"
 
-echo
-echo "== desktop config + assets =="
-have "etc/xdg/vasak/labwc/rc.xml"
-have "etc/xdg/vasak/labwc/menu.xml"
-have "etc/xdg/vasak/labwc/autostart"
-have "usr/share/vasak-shell/main.py"
-have "usr/share/vasak-shell/data/shell.css"
-have "usr/share/vasak-shell/ipc.py"
-have "usr/share/vasak-shell/startmenu/window.py"
-have "usr/share/backgrounds/vasak/glass.png"
-have "usr/share/themes/Vasak-Glass/gtk-4.0/gtk-dark.css"
-have "usr/share/pixmaps/vasak-logo.png"
+			echo
+			echo "== desktop config + assets =="
+			have "etc/xdg/vasak/labwc/rc.xml"
+			have "etc/xdg/vasak/labwc/menu.xml"
+			have "etc/xdg/vasak/labwc/autostart"
+			have "usr/share/vasak-shell/main.py"
+			have "usr/share/vasak-shell/data/shell.css"
+			have "usr/share/vasak-shell/ipc.py"
+			have "usr/share/vasak-shell/startmenu/window.py"
+			have "usr/share/backgrounds/vasak/glass.png"
+			have "usr/share/themes/Vasak-Glass/gtk-4.0/gtk-dark.css"
+			have "usr/share/pixmaps/vasak-logo.png"
 
-echo
-echo "== graphics stack (VMware needs vmwgfx) =="
-have "usr/lib/girepository-1.0/Gtk4LayerShell-1.0.typelib"
-have "usr/lib/dri/swrast_dri.so"
-have "usr/lib/dri/vmwgfx_dri.so"
+			echo
+			echo "== graphics stack (VMware needs vmwgfx) =="
+			have "usr/lib/girepository-1.0/Gtk4LayerShell-1.0.typelib"
+			have "usr/lib/dri/swrast_dri.so"
+			have "usr/lib/dri/vmwgfx_dri.so"
+			;;
+		tty|base)
+			echo
+			echo "== base live session =="
+			have "etc/systemd/system/getty@tty1.service.d/autologin.conf"
+			have "root/.bash_profile"
+			have "usr/bin/vasak-install"
+			;;
+	esac
 
-echo
-echo "== offline repo =="
-have "opt/vasak/repo/vasak.db.tar.zst"
+	echo
+	echo "== offline repo =="
+	have "opt/vasak/repo/vasak.db.tar.zst"
+}
+
+check_profile_files
 
 echo
 echo "== no bytecode shipped =="
@@ -72,13 +90,13 @@ trap 'rm -f "$LIST"; rm -rf "$TMP"' EXIT
 
 echo
 echo "== file contents =="
+SRC="$TMP/squashfs-root"
+
+# Extract files for content checks
 for f in etc/systemd/system/getty@tty1.service.d/autologin.conf root/.bash_profile \
 	 etc/xdg/vasak/labwc/rc.xml etc/xdg/vasak/labwc/autostart; do
 	"$UNSQ" -q -d "$TMP" -e "$f" "$SFS" >/dev/null 2>&1
 done
-
-# unsquashfs -d creates squashfs-root/ under the destination
-SRC="$TMP/squashfs-root"
 
 grep -q -- "--autologin root" "$SRC/etc/systemd/system/getty@tty1.service.d/autologin.conf" 2>/dev/null \
 	&& echo "  ok   tty1 auto-logins root" \
@@ -88,13 +106,15 @@ grep -q "vasak-session" "$SRC/root/.bash_profile" 2>/dev/null \
 	&& echo "  ok   profile starts vasak-session" \
 	|| { echo "  FAIL profile does not start the desktop"; fail=$((fail + 1)); }
 
-grep -q "<labwc_config" "$SRC/etc/xdg/vasak/labwc/rc.xml" 2>/dev/null \
-	&& echo "  ok   rc.xml is labwc XML" \
-	|| { echo "  FAIL rc.xml is not labwc XML"; fail=$((fail + 1)); }
+if [ "$PROFILE" = "vasak" ] || [ "$PROFILE" = "xfce" ]; then
+	grep -q "<labwc_config" "$SRC/etc/xdg/vasak/labwc/rc.xml" 2>/dev/null \
+		&& echo "  ok   rc.xml is labwc XML" \
+		|| { echo "  FAIL rc.xml is not labwc XML"; fail=$((fail + 1)); }
 
-grep -q "vasak-shell" "$SRC/etc/xdg/vasak/labwc/autostart" 2>/dev/null \
-	&& echo "  ok   autostart launches the shell" \
-	|| { echo "  FAIL autostart does not launch the shell"; fail=$((fail + 1)); }
+	grep -q "vasak-shell" "$SRC/etc/xdg/vasak/labwc/autostart" 2>/dev/null \
+		&& echo "  ok   autostart launches the shell" \
+		|| { echo "  FAIL autostart does not launch the shell"; fail=$((fail + 1)); }
+fi
 
 echo
 if [ "$fail" -ne 0 ]; then
