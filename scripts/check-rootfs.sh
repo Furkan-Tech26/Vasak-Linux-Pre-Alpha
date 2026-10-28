@@ -132,7 +132,7 @@ check_file() {
     local pattern="$2"
     local msg_ok="$3"
     local msg_fail="$4"
-    if [ -f "$SRC/$file" ] && grep -Fq "$pattern" "$SRC/$file"; then
+    if [ -f "$SRC/$file" ] && fgrep -q "$pattern" "$SRC/$file"; then
         echo "  ok   $msg_ok"
     else
         echo "  FAIL $msg_fail"
