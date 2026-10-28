@@ -79,6 +79,8 @@ echo
 echo "== no bytecode shipped =="
 if grep -q "__pycache__" "$LIST"; then
 	printf '  FAIL __pycache__ present in the image\n'
+	# Show what matched
+	grep "__pycache__" "$LIST" | head -20 | sed 's/^/    /'
 	fail=$((fail + 1))
 else
 	printf '  ok   no __pycache__\n'
@@ -93,18 +95,32 @@ echo "== file contents =="
 
 # Extract the whole squashfs to a temp dir for content checks
 FULL_EXTRACT="$TMP/full"
-"$UNSQ" -d "$FULL_EXTRACT" "$SFS" >/dev/null 2>&1 || {
-    echo "  FAIL full extraction failed"
+mkdir -p "$FULL_EXTRACT"
+echo "  Extracting $SFS to $FULL_EXTRACT"
+"$UNSQ" -d "$FULL_EXTRACT" "$SFS"
+EXTRACT_RC=$?
+echo "  unsquashfs exit code: $EXTRACT_RC"
+if [ $EXTRACT_RC -ne 0 ]; then
+    echo "  FAIL full extraction failed (exit $EXTRACT_RC)"
     fail=$((fail + 1))
-}
+fi
 
 SRC="$FULL_EXTRACT/squashfs-root"
 
+# Some unsquashfs versions extract directly to dest dir, not dest/squashfs-root
 if [ ! -d "$SRC" ]; then
-    echo "  FAIL extraction did not create squashfs-root"
-    fail=$((fail + 1))
+    # Check if files were extracted directly to FULL_EXTRACT
+    if [ -f "$FULL_EXTRACT/etc/systemd/system/getty@tty1.service.d/autologin.conf" ]; then
+        echo "  Files extracted directly to $FULL_EXTRACT (no squashfs-root)"
+        SRC="$FULL_EXTRACT"
+    else
+        echo "  FAIL extraction did not create squashfs-root"
+        echo "  Contents of $FULL_EXTRACT:"
+        ls -la "$FULL_EXTRACT" | sed 's/^/    /'
+        fail=$((fail + 1))
+    fi
 else
-    echo "  Extracted tree root exists"
+    echo "  Extracted tree root: $SRC"
 fi
 
 check_file() {

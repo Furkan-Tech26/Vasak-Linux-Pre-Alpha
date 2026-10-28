@@ -241,10 +241,17 @@ jobs:
               echo "== Final bytecode sweep in staging airootfs =="
               STAGE=$(ls -d /work/build/profile-$PROFILE/airootfs 2>/dev/null | head -1)
               if [ -n "$STAGE" ]; then
+                  echo "  Sweeping $STAGE"
                   find "$STAGE" -type d -name "__pycache__" -print -exec rm -rf {} + 2>/dev/null || true
                   find "$STAGE" -name "*.pyc" -print -delete 2>/dev/null || true
                   find "$STAGE" -name "*.pyo" -print -delete 2>/dev/null || true
+              else
+                  echo "  WARNING: staging airootfs not found"
               fi
+              # Also sweep any pycache in the whole work tree (paranoia)
+              find /work -type d -name "__pycache__" -print -exec rm -rf {} + 2>/dev/null || true
+              find /work -name "*.pyc" -print -delete 2>/dev/null || true
+              find /work -name "*.pyo" -print -delete 2>/dev/null || true
               echo "Staging sweep done"
 
               echo "== Verifying live root filesystem =="
