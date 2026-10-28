@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 #
-# Vaşak Linux base profile definition for archiso
+# Vasak Linux base profile definition for archiso
 # Independent distro using pacman + Arch repos + AUR
-# "Vaşak" = badger (Anatolian native), successor to Pardus (leopard)
+# "Vasak" = badger (Anatolian native), successor to Pardus (leopard)
 #
 
 # Profile name and description
 profile_name="vasak-base"
-profile_description="Vaşak Linux - Minimal base using pacman, Arch repos & AUR"
+profile_description="Vasak Linux - Minimal base using pacman, Arch repos & AUR"
 
 # Architecture
 arch="x86_64"
@@ -15,8 +15,8 @@ arch="x86_64"
 # ISO settings
 iso_name="vasak"
 iso_label="VASAK_$(date +%Y%m)"
-iso_publisher="Vaşak Linux <https://github.com/Furkan-Tech26/Vasak-Linux-Pre-Alpha>"
-iso_application="Vaşak Linux Live/Install ISO"
+iso_publisher="Vasak Linux <https://github.com/Furkan-Tech26/Vasak-Linux-Pre-Alpha>"
+iso_application="Vasak Linux Live/Install ISO"
 iso_version="$(date +%Y.%m.%d)"
 
 # Installation settings
