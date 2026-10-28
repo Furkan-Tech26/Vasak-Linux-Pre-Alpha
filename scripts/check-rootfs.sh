@@ -79,9 +79,10 @@ check_profile_files
 
 echo
 echo "== no bytecode shipped =="
-# System Python installs its own __pycache__ in /usr/lib/python3.*/ - that's expected.
-# Only fail on __pycache__ in our own package directories.
-PYCACHE_MATCHES=$(grep "__pycache__" "$LIST" | grep -v "usr/lib/python3\." || true)
+# System Python installs its own __pycache__ in /usr/lib/python3.*/ and
+# /usr/share/gcc-*/python/ - that's expected. Only fail on __pycache__ in
+# our own package directories.
+PYCACHE_MATCHES=$(grep "__pycache__" "$LIST" | grep -v -E "usr/lib/python3\.|usr/share/gcc-[0-9]+/python/" || true)
 if [ -n "$PYCACHE_MATCHES" ]; then
 	printf '  FAIL __pycache__ present in our packages\n'
 	echo "$PYCACHE_MATCHES" | head -20 | sed 's/^/    /'
