@@ -152,8 +152,13 @@ jobs:
           text = profile.read_text(encoding="utf-8")
           if "vasak-session" not in text:
               raise SystemExit(f"{profile}: does not start vasak-session")
-          if "/run/archiso/bootmnt" not in text:
+          # copytoram removes /run/archiso/bootmnt, so the guard must be the
+          # parent directory.
+          if "/run/archiso" not in text:
               raise SystemExit(f"{profile}: missing live-medium guard")
+          if "/run/archiso/bootmnt" in text:
+              raise SystemExit(
+                  f"{profile}: guard must not depend on bootmnt (copytoram)")
           if "exec vasak-session" in text:
               raise SystemExit(f"{profile}: must not exec, the shell is the fallback")
 

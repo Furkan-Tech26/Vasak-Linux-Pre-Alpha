@@ -4,6 +4,13 @@
    startmenu/window.py) so the panel's rounded corners never leak onto the
    full-screen start menu. */
 
+/* The start screen is edge-to-edge like Windows 8.1: the GTK theme rounds
+   plain windows, so reset it explicitly here (application priority beats the
+   theme provider). */
+.vasak-startmenu {
+    border-radius: 0;
+}
+
 /* ===== Panel ===== */
 .app-menu-button {
     min-width: 44px;

@@ -7,10 +7,14 @@
 # The desktop is started as a child, never with exec: if labwc or vasak-shell
 # fails, its output stays on the console and this shell remains available for
 # recovery. Set VASAK_NO_DE=1 to skip the autostart at boot.
+#
+# The guard is /run/archiso rather than its bootmnt subdirectory: with
+# copytoram=auto archiso unmounts that mountpoint after copying the image to
+# RAM, so a check for it would silently disable the desktop on roomy machines.
 
 if [ -z "${VASAK_LIVE_TRIED:-}" ] &&
    [ -z "${VASAK_NO_DE:-}" ] &&
-   [ -d /run/archiso/bootmnt ] &&
+   [ -d /run/archiso ] &&
    [ "$(tty 2>/dev/null)" = "/dev/tty1" ] &&
    command -v vasak-session >/dev/null 2>&1; then
     export VASAK_LIVE_TRIED=1
