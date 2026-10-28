@@ -208,6 +208,10 @@ jobs:
           print("vasak-shell modules import OK")
           PY
 
+              echo "== vasak-shell offline unit tests =="
+              python /work/tests/test_shell_offline.py \
+                /work/packages/desktop/vasak-shell/app
+
               echo "== Preparing build user =="
               id builder &>/dev/null || useradd -m builder
               echo "builder ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/builder
