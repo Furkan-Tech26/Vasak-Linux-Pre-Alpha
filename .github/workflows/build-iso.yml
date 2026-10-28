@@ -263,8 +263,10 @@ jobs:
                   echo "FAIL: airootfs.sfs not found in ISO"
                   exit 1
               fi
-              echo "=== DEBUG: check-rootfs.sh content (first 20 lines) ==="
-              head -20 /work/scripts/check-rootfs.sh
+              echo "=== DEBUG: check-rootfs.sh content (first 30 lines) ==="
+              head -30 /work/scripts/check-rootfs.sh
+              echo "=== DEBUG: grep line in check_file ==="
+              grep -n "grep" /work/scripts/check-rootfs.sh | head -5
               bash /work/scripts/check-rootfs.sh "$SFS" "$PROFILE"
 
               # Files created by root inside the container must be readable by
