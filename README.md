@@ -8,6 +8,7 @@
 #+#+#+#   #+#     #+# #+#    #+# #+#     #+# #+#   #+#                            
  ###     ###     ###  ########  ###     ### ###    ###                            
                         ###
+ ```
 > This is the build wiki (kinda) of the Turkish Linux Distrobution, Vaşak Linux (Comes from the anatolian wild cat Lynx)
 
 ---
