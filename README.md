@@ -1,9 +1,14 @@
-# Vaşak Linux — Build Instructions
-
-> Independent Turkish distro • pacman + Arch repos + AUR • "Vaşak" = badger (Anatolian native)
-
-## GitHub
-[https://github.com/Furkan-Tech26/Vasak-Linux-Pre-Alpha](https://github.com/Furkan-Tech26/Vasak-Linux-Pre-Alpha)
+# Vaşak Linux — Build Instructions                                                       
+                                                                                  
+   :::     :::     :::      ::::::::      :::     :::    :::                      
+  :+:     :+:   :+: :+:   :+:    :+:   :+: :+:   :+:   :+:                        
+ +:+     +:+  +:+   +:+  +:+         +:+   +:+  +:+  +:+                          
++#+     +:+ +#++:++#++: +#++:++#++ +#++:++#++: +#++:++                            
++#+   +#+  +#+     +#+        +#+ +#+     +#+ +#+  +#+                            
+#+#+#+#   #+#     #+# #+#    #+# #+#     #+# #+#   #+#                            
+ ###     ###     ###  ########  ###     ### ###    ###                            
+                        ###
+> This is the build wiki (kinda) of the Turkish Linux Distrobution, Vaşak Linux (Comes from the anatolian wild cat Lynx)
 
 ---
 
@@ -227,7 +232,7 @@ qemu-system-x86_64 -cdrom iso-profiles/vasak/out/vasak-de-*.iso -m 4G -enable-kv
 4. ✅ VPM (Vaşak Package Manager) wrapper
 5. ✅ Custom Vaşak DE (shell + settings + glassmorphism + labwc session)
 6. ✅ CI/CD (GitHub Actions builds ISOs on tag / manual dispatch)
-7. 🔲 Real hardware test (USB → laptop) — after the first CI ISO passes
+7. 🔲 Real hardware test (USB → laptop) — after the first CI ISO passes (Wish me luck pls)
 
----
-*Badger doesn't care. Badger builds.*
+--
+#Am i aura farming chat?
